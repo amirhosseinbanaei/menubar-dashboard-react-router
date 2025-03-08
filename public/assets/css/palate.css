@@ -1,0 +1,15 @@
+:root {
+  --primary-300: #7d8ce3;
+  --primary-500: #5E72E4;
+  --primary-background: #fbfbfd;
+
+  --typography-white: #ffffff;
+  --typography-navbar: #ffffff;
+  --typography-herosection: #ffffff;
+  --typography-500: #adb5bd;
+  --typography-700: #495057;
+
+  --input-background: #ffffff;
+  --sidebar-background: #ffffff;
+  --border-300: #d2d6da;
+}
