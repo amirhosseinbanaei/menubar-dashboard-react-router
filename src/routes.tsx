@@ -14,7 +14,6 @@ import { AuthGuard } from './modules/auth/guard/auth.guard';
 import HomePage from './modules/home/pages/home.page';
 import MainLayout from './common/components/layouts/main.layout';
 import CategoriesPage from './modules/categories/pages/categories.page';
-import LoginPage from './modules/auth/pages/otp.page';
 // import MainLayout from './layouts/MainLayout';
 // import AddCategory from './pages/AddCategory';
 // import EditCategory from './pages/EditCategory';
@@ -109,10 +108,6 @@ const AllRoutes = memo(function AllRoutes() {
         <Route
           path='/login'
           element={<Login />}
-        />
-        <Route
-          path='/auth/otp'
-          element={<LoginPage />}
         />
       </Routes>
     </Suspense>
