@@ -2,24 +2,27 @@ import { create } from 'zustand';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
 
-export const reciveAuthCode = async (phoneNumber: number) => {
+export const reciveAuthCode = async (phoneNumber) => {
   const isRecivedCode = axios
-    .post('http://localhost:6001/api/sms/send-code', {
-      phoneNumber,
+    .post('http://localhost:4000/auth/request-otp', {
+      phone_number: phoneNumber,
     })
     .then((res) => {
-      res.status === 200 && alert(`کد ورود شما : ${res.data.verifyCode}`);
+      console.log(res);
+      res.status === 200 && alert(`کد ورود شما : ${res.data.data.otp}`);
       return true;
     })
-    .catch(() => false);
+    .catch((error) => {
+      console.log(error);
+    });
   return isRecivedCode;
 };
 
 export const verifyAuthCode = (phoneNumber, verifyCode) => {
   const isCorrectCode = axios
-    .post('http://localhost:6001/api/sms/verify-code', {
-      phoneNumber,
-      verifyCode,
+    .post('http://localhost:4000/auth/verify-otp', {
+      phone_number: phoneNumber,
+      otp: verifyCode,
     })
     .then((res) => {
       res.status === 200 && toast.success(`وارد حساب شدید`);

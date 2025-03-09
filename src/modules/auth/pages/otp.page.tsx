@@ -21,7 +21,7 @@ export type LoginFormValues = z.infer<typeof loginSchema>;
 export default function LoginPage() {
   const [searchParams] = useSearchParams();
   const [otp, setOTP] = useState(['', '', '', '']);
-  const { sendOtp, verifyOtp, showOtp, isLoading } = useAuthStore();
+  const { sendOtp, verifyOtp, showOtp } = useAuthStore();
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -32,7 +32,6 @@ export default function LoginPage() {
 
   const onSubmit = async (data: LoginFormValues) => {
     if (!showOtp) {
-      console.log(data);
       await sendOtp(data.phoneNumber);
     } else {
       const otpString = otp.join('');
@@ -73,7 +72,7 @@ export default function LoginPage() {
               //   form.formState.isSubmitting ||
               //   isLoading
               // }
-              >
+            >
               تایید و ادامه
             </Button>
           </form>
