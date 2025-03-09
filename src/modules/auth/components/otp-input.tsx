@@ -22,7 +22,7 @@ export function OtpInput({ value, onChange, length = 4 }: OtpInputProps) {
     newOtp[index] = digit;
     onChange(newOtp);
 
-    // Move to next input if there's a value
+    // Move to next input if there's a value :
     if (digit && index < length - 1) {
       inputRefs.current[index + 1]?.focus();
     }
