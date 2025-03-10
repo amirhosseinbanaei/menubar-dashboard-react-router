@@ -1,0 +1,12 @@
+{
+  "price": {
+    "units": {
+      "tooman": "تومان",
+      "riyal": "ریال",
+      "hezar-tooman": "هزار تومان",
+      "dollar": "$",
+      "euro": "€"
+    },
+    "finish": "ناموجود"
+  }
+}

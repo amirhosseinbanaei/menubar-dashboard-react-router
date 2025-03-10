@@ -1,0 +1,7 @@
+WE HAVE JUST 3 API ROUTES = 
+
+1. UPLOAD API
+2. GET CATEGORISE API
+3. GET ITEMS API
+
+TIP : all other actions handle with server actions

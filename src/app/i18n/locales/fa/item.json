@@ -1,0 +1,42 @@
+{
+  "container_text": "محصولات",
+
+  "buttons": {
+    "cta": "افزودن محصول",
+    "changeOrder": "ویرایش ترتیب نمایش",
+    "acceptOrder": "اعمال تغییرات"
+  },
+
+  "toasts": {
+    "notFound": "محصول یافت نشد !",
+    "internalError": "خطایی در سرور رخ داد !",
+    "invalidId": "اطلاعات ارسال شده صحیح نیست !!",
+
+    "deleteSuccessfully": "محصول با موفقیت حذف شد",
+
+    "addExtraItemSuccessfully": "آیتم اضافی با موفقیت افزوده شد",
+    "deleteExtraItemSuccessfully": "آیتم اضافی با موفقیت حذف شد",
+    "editExtraItemSuccessfully": "تغییرات آیتم اضافی با موفقیت اعمال شد"
+  },
+  "price": {
+    "units": {
+      "tooman": "تومان",
+      "riyal": "ریال",
+      "hezar-tooman": "هزار تومان",
+      "dollar": "$",
+      "euro": "€"
+    },
+    "finish": "ناموجود"
+  },
+  "dialog": {
+    "texts": {
+      "title": "حذف محصول",
+      "description1": "آیا از حذف محصول",
+      "description2": "اطمینان دارید ؟"
+    },
+    "buttons": {
+      "cancel": "انصراف",
+      "delete": "حذف"
+    }
+  }
+}

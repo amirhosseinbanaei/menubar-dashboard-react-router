@@ -1,0 +1,69 @@
+{
+  "container_text_edit": "ویرایش دسته بندی",
+  "container_text_add": "افزودن دسته بندی",
+  "container_text_subCategory": "زیر دسته ها",
+  "inputs": {
+    "name": {
+      "fa": "نام دسته بندی به فارسی",
+      "en": "نام دسته بندی به انگلیسی",
+      "ar": "نام دسته بندی به عربی",
+      "placeholder": {
+        "fa": "نوشیدنی های گرم",
+        "en": "Hot Beverages",
+        "ar": "نام دسته بندی به عربی"
+      }
+    },
+    "subCategoryName": {
+      "fa": "نام زیر دسته به فارسی",
+      "en": "نام زیر دسته به انگلیسی",
+      "ar": "نام زیر دسته به عربی",
+      "fr": "نام زیر دسته به فرانسوی",
+      "placeholder": {
+        "fa": "پیتزا آمریکایی",
+        "en": "American Pizza",
+        "ar": "بيتزا أمريكية",
+        "fr": "Pizza américaine"
+      }
+    },
+    "errors": {
+      "name": {
+        "min": "نام دسته بندی حداقل باید 2 کاراکتر باشد",
+        "max": "نام دسته بندی حداکثر باید 25 کاراکتر باشد"
+      },
+      "subCategoryName": {
+        "min": "نام زیر دسته حداقل باید 2 کاراکتر باشد",
+        "max": "نام زیر دسته حداکثر باید 25 کاراکتر باشد"
+      }
+    }
+  },
+  "toasts": {
+    "internalError": "خطایی در سرور رخ داد !",
+    "notFound": "دسته بندی یافت نشد !",
+    "addSuccessfully": "دسته بندی با موفقیت افزوده شد",
+    "editSuccessfully": "تغییرات شما با موفقیت اعمال شد",
+    "addSubCategorySuccessfully": "زیر دسته افزوده شد",
+    "deleteSubCategorySuccessfully": "زیر دسته با موفقیت حذف شد",
+    "editSubCategorySuccessfully": "تغییرات زیر دسته با موفقیت اعمال شد",
+    "invalidId": "اطلاعات ارسال شده صحیح نیست !!"
+  },
+  "buttons": {
+    "edit": "اعمال تغییرات",
+    "add": "افزودن"
+  },
+  "dialog": {
+    "texts": {
+      "title_add": "افزودن زیر دسته",
+      "title_edit": "ویرایش زیر دسته",
+      "title_delete": "حذف زیر دسته",
+      "delete_description1": "آیا از حذف زیر دسته",
+      "delete_description2": "اطمینان دارید ؟"
+    },
+    "buttons": {
+      "trigger": "افزودن زیر دسته",
+      "cancel": "انصراف",
+      "add": "افزودن",
+      "edit": "اعمال تغییرات",
+      "delete": "حذف"
+    }
+  }
+}

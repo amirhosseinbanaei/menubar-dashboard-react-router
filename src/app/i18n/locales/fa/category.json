@@ -1,0 +1,27 @@
+{
+  "container_text": "دسته بندی ها",
+
+  "buttons": {
+    "cta": "افزودن دسته بندی",
+    "changeOrder": "ویرایش ترتیب نمایش",
+    "acceptOrder": "اعمال تغییرات"
+  },
+
+  "toasts": {
+    "internalError": "خطایی در سرور رخ داد !",
+    "notFound": "دسته بندی یافت نشد !",
+    "deleteSuccessfully": "دسته بندی با موفقیت حذف شد",
+    "invalidId": "اطلاعات ارسال شده صحیح نیست !!"
+  },
+  "dialog": {
+    "texts": {
+      "title": "حذف دسته بندی",
+      "description1": "آیا از حذف دسته بندی",
+      "description2": "اطمینان دارید ؟"
+    },
+    "buttons": {
+      "cancel": "انصراف",
+      "delete": "حذف"
+    }
+  }
+}
