@@ -1,3 +1,6 @@
+import { categories } from '@/modules/categories/translations/category.translation';
+import { fa as nav_items } from './nav-item.translation';
+import { languages } from '@/modules/languages/translations/language.translation';
 const inputErrors = {
   required: {
     name: 'اسم دسته بندی را وارد کنید',
@@ -12,18 +15,10 @@ const inputErrors = {
 const fa = {
   register: 'زبان ها',
 
-  sidebarItems: {
-    dashboard: 'داشبورد',
-    categories: 'دسته بندی ها',
-    items: 'آیتم ها',
-    settings: 'تنظیمات',
-    customers: 'باشگاه مشتریان',
-    About: 'درباره مجموعه',
-    OrderedItem: 'سفارش های ثبت شده',
-    TableRreserve: 'میز های رزرو شده',
-  },
-
   inputErrors,
+  nav_items,
+  categories,
+  languages,
 
   socials: {
     instagram: 'اینستاگرام',

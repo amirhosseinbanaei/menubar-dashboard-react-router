@@ -67,8 +67,8 @@ export default function Login() {
       <div
         className='h-screen bg-white flex flex-col justify-center items-center'
         dir={dir}>
-        <div className='bg-white w-96 shadow-xl rounded p-5'>
-          <h1 className='text-center font-medium tracking-normal my-5'>
+        <div className='bg-white w-96 shadow-c-xl rounded p-5'>
+          <h1 className='text-center font-medium tracking-normal my-5 text-text'>
             به پنل ادمین منوبار خوش آمدید
           </h1>
           <LoginForm />

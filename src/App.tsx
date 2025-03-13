@@ -11,13 +11,12 @@ import AllRoutes from './routes.jsx';
 // Third Party Library
 import { Toaster } from 'react-hot-toast';
 
-
 // Contexts
 // import { MenuProvider } from './contexts/MenuContext';
 // import { AuthContextProvider } from './contexts/AuthContext';
 // import { LanguageProvider } from './contexts/LanguageContext';
 
-const queryClient = new QueryClient();
+export const queryClient = new QueryClient();
 
 function App() {
   return (

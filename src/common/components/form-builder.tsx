@@ -3,12 +3,16 @@ import { Form } from './ui/form';
 import { UseFormReturn } from 'react-hook-form';
 import { ReactNode } from 'react';
 import { z } from 'zod';
+// import { DevTool } from '@hookform/devtools';
 
 interface FormBuilderProps<TFormSchema extends z.ZodType> {
   form: UseFormReturn<z.infer<TFormSchema>>;
-  onSubmit: (data: z.infer<TFormSchema>) => void;
+  onSubmit: (
+    // form: UseFormReturn<z.infer<TFormSchema>>,
+    data: z.infer<TFormSchema>,
+  ) => void;
   children: ReactNode;
-  buttonTitle: string;
+  buttonTitle?: string;
   schema: TFormSchema;
 }
 
@@ -26,27 +30,23 @@ export function FormBuilder<TFormSchema extends z.ZodType>({
 
   return (
     <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(handleSubmit)}
-        className='space-y-5'>
+      <form onSubmit={form.handleSubmit(handleSubmit)}>
         {children}
-        <div className='w-full h-auto flex flex-col items-end my-5'>
-          <Button
-            type='submit'
-            disabled={
-              !form.formState.isDirty ||
-              !form.formState.isValid ||
-              form.formState.isSubmitting
-            }
-            className={`${
-              (form.formState.isSubmitting ||
-                !form.formState.isValid ||
-                !form.formState.isDirty) &&
-              'opacity-75'
-            }`}>
-            {buttonTitle}
-          </Button>
-        </div>
+        {buttonTitle && (
+          <div className='w-full h-auto flex flex-col items-end my-5'>
+            <Button
+              type='submit'
+              variant='primary'
+              disabled={!form.formState.isValid || form.formState.isSubmitting}
+              className={`${
+                (form.formState.isSubmitting || !form.formState.isValid) &&
+                'opacity-75'
+              }`}>
+              {buttonTitle}
+            </Button>
+          </div>
+        )}
+        {/* <DevTool control={form.control} /> */}
       </form>
     </Form>
   );

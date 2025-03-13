@@ -38,13 +38,43 @@ function FormInput<TFormSchema extends z.ZodType>({
       name={name}
       render={({ field }) => (
         <FormItem>
-          <FormLabel className='block tracking-none font-medium mb-2 mx-1 text-sm text-typography-500'>
+          <FormLabel className='block tracking-none font-medium mb-3 mx-1 text-sm text-text-light'>
             {label}
           </FormLabel>
           <FormControl>
             <Input
               type={type}
               placeholder={placeholder}
+              className='placeholder:text-text-light'
+              {...field}
+            />
+          </FormControl>
+          <FormMessage />
+        </FormItem>
+      )}
+    />
+  );
+}
+
+function FormTextarea<TFormSchema extends z.ZodType>({
+  form,
+  name,
+  label,
+  placeholder,
+}: FormInputProps<TFormSchema>) {
+  return (
+    <FormField
+      control={form.control}
+      name={name}
+      render={({ field }) => (
+        <FormItem>
+          <FormLabel className='block tracking-none font-medium mb-3 mx-1 text-sm text-text-light'>
+            {label}
+          </FormLabel>
+          <FormControl>
+            <textarea
+              placeholder={placeholder}
+              className='text-text placeholder:text-text-light my-2 block h-20 w-full resize-none rounded-sm border border-gray-200 bg-white px-5 py-3 text-sm leading-7 placeholder:text-sm focus:outline-primary focus:ring-0'
               {...field}
             />
           </FormControl>
@@ -105,6 +135,7 @@ function FormInput<TFormSchema extends z.ZodType>({
 // }
 
 export {
+  FormTextarea,
   FormInput,
   // FormSelect
 };

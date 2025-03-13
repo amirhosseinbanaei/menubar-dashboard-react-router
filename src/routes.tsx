@@ -14,6 +14,9 @@ import { AuthGuard } from './modules/auth/guard/auth.guard';
 import HomePage from './modules/home/pages/home.page';
 import MainLayout from './common/components/layouts/main.layout';
 import CategoriesPage from './modules/categories/pages/categories.page';
+import ItemsPage from './modules/items/pages/items.page';
+import AddCategoryPage from './modules/categories/pages/add-category.page';
+import EditCategoryPage from './modules/categories/pages/edit-category.page';
 // import MainLayout from './layouts/MainLayout';
 // import AddCategory from './pages/AddCategory';
 // import EditCategory from './pages/EditCategory';
@@ -59,6 +62,18 @@ const AllRoutes = memo(function AllRoutes() {
           <Route
             path='/categories'
             element={<AuthGuard element={<CategoriesPage />} />}
+          />
+          <Route
+            path='/categories/add'
+            element={<AuthGuard element={<AddCategoryPage />} />}
+          />
+          <Route
+            path='/categories/*'
+            element={<AuthGuard element={<EditCategoryPage />} />}
+          />
+          <Route
+            path='/items'
+            element={<AuthGuard element={<ItemsPage />} />}
           />
           {/* <Route
             path='/categories'

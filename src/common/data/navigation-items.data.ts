@@ -1,35 +1,51 @@
 import {
   HomeIcon,
   ShoppingCartIcon,
-  HeartIcon,
   // InformationCircleIcon,
   UserCircleIcon,
+  TagIcon,
+  InformationCircleIcon,
 } from '@heroicons/react/24/outline';
 
 const navigationItems = [
-  { id: 1, title: 'dashboard', href: '/', icons: HomeIcon },
-  { id: 2, title: 'categories', href: '/categories', icons: ShoppingCartIcon },
-  { id: 3, title: 'items', href: '/items', icons: HeartIcon },
-  { id: 4, title: 'customers', href: '/customers', icons: UserCircleIcon },
+  { id: 1, translation_key: 'dashboard', href: '/', icons: HomeIcon },
+  {
+    id: 2,
+    translation_key: 'categories',
+    href: '/categories',
+    icons: ShoppingCartIcon,
+  },
+  { id: 3, translation_key: 'items', href: '/items', icons: TagIcon },
+  {
+    id: 4,
+    translation_key: 'customers',
+    href: '/customers',
+    icons: UserCircleIcon,
+  },
   // {
   //    id: 5,
-  //    title: 'settings',
+  //    translation_key: 'settings',
   //    href: '/settings',
   //    icons: InformationCircleIcon,
   // },
-  { id: 6, title: 'About', href: '/about', icons: UserCircleIcon },
   {
-    id: 7,
-    title: 'OrderedItem',
-    href: '/ordered-items',
-    icons: UserCircleIcon,
+    id: 6,
+    translation_key: 'about',
+    href: '/about',
+    icons: InformationCircleIcon,
   },
-  {
-    id: 8,
-    title: 'TableRreserve',
-    href: '/reserved-table',
-    icons: UserCircleIcon,
-  },
+  // {
+  //   id: 7,
+  //   translation_key: 'OrderedItem',
+  //   href: '/ordered-items',
+  //   icons: UserCircleIcon,
+  // },
+  // {
+  //   id: 8,
+  //   translation_key: 'TableRreserve',
+  //   href: '/reserved-table',
+  //   icons: UserCircleIcon,
+  // },
 ];
 
 export { navigationItems };
