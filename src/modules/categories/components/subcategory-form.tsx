@@ -1,127 +1,131 @@
-import { ReactNode, useEffect } from 'react';
-import { useForm, UseFormReturn } from 'react-hook-form';
+import { ReactNode, useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { FormBuilder } from '@/common/components/form-builder';
 import { useLanguages } from '@/modules/languages/hooks/useLanguages';
-import type { Category } from '../interfaces/category.interface';
 import { TranslationTabs } from '@/common/components/translation-tabs';
 import { useTranslation } from 'react-i18next';
-import { CreateSubcategory } from '../interfaces/create-subcategory.interface';
+import { Subcategory } from '../interfaces/subcategory.interface';
+import { useCreateSubcategory } from '../hooks/useCreateSubcategory';
+import { Translation } from '@/modules/languages/interfaces/translation.interface';
+import { useUpdateSubcategory } from '../hooks/useUpdateSubcategory';
+import { useLocation } from 'react-router';
 
 // Schemas
-const subcategoryTranslationSchema = z.object({
-  language: z.string(),
-  name: z.string().min(2, 'نام دسته بندی الزامی است'),
-});
-
 const subcategoryFormSchema = z.object({
   translations: z
-    .array(subcategoryTranslationSchema)
+    .array(
+      z.object({
+        language: z.string(),
+        name: z.string().min(2, 'نام دسته بندی الزامی است'),
+      }),
+    )
     .min(1, 'حداقل یک ترجمه الزامی است'),
 });
-
-export type SubcategoryTranslationValues = z.infer<
-  typeof subcategoryTranslationSchema
->;
 
 export type SubcategoryFormValues = z.infer<typeof subcategoryFormSchema>;
 
 interface SubcategoryFormProps {
-  initialValue?: Category;
-  formAction: (
-    data: CreateSubcategory,
-    form: UseFormReturn<SubcategoryFormValues>,
-  ) => void;
-  children: ReactNode;
+  children?: ReactNode;
+  initialValue?: Subcategory;
 }
 
-function SubcategoryForm({
-  initialValue,
-  formAction,
-  children,
-}: SubcategoryFormProps) {
-  const { data: languages } = useLanguages();
+function SubcategoryForm({ initialValue, children }: SubcategoryFormProps) {
   const { t } = useTranslation();
+  const { data: languages } = useLanguages();
+
+  const pathname = useLocation().pathname;
+  const categoryId = Number(
+    pathname.split('/')[pathname.split('/').length - 1],
+  );
+  const { mutateAsync: createSubcategory } = useCreateSubcategory({
+    categoryId,
+  });
+  const { mutateAsync: updateSubcategory } = useUpdateSubcategory();
+  const [selectedLanguageIndex, setSelectedLanguageIndex] = useState(0);
+
+  const defaultValues: SubcategoryFormValues = {
+    translations: [],
+  };
 
   const form = useForm<SubcategoryFormValues>({
     resolver: zodResolver(subcategoryFormSchema),
-    defaultValues: {
-      translations: [],
-    },
+    defaultValues,
   });
 
-  // Initialize translations when languages are loaded
   useEffect(() => {
-    if (languages) {
-      const translations = languages.map((lang) => ({
-        language: lang.language_code,
-        name:
-          initialValue?.translations.find(
-            (t) => t.language === lang.language_code,
-          )?.name || '',
-      }));
+    if (!languages) return;
 
-      form.reset({
-        translations,
-      });
-    }
-  }, [languages, initialValue, form]);
-
-  if (!languages?.length) {
-    return null;
-  }
-
-  const onSubmit = async (data: SubcategoryFormValues) => {
-    if (initialValue) {
-      const newTranslations = [] as SubcategoryTranslationValues[];
-      const changedFields = form.formState.dirtyFields;
-      Object.entries(changedFields).forEach(([key, value]) => {
-        if (key === 'translations') {
-          value.forEach((_, index) => {
-            newTranslations.push(data.translations[index]);
-          });
-        }
-      });
-      formAction(
-        {
-          restaurant_id: 1,
-          category_id: 15,
-          translations: newTranslations,
-        },
-        form,
+    const translations = languages.map((lang) => {
+      const foundTranslation = initialValue?.translations.find(
+        (t) => t.language === lang.language_code,
       );
-    }
-    formAction(
-      {
+
+      return {
+        language: lang.language_code,
+        name: foundTranslation?.name || '',
+      };
+    });
+
+    form.reset({
+      ...defaultValues,
+      translations,
+    });
+  }, [languages, initialValue, form.reset]);
+
+  const handleSubmit = (data: SubcategoryFormValues) => {
+    const addSubcategoryHandler = async () => {
+      if (initialValue) return null;
+      const res = await createSubcategory({
+        ...data,
         restaurant_id: 1,
-        category_id: 15,
-        translations: data.translations,
-      },
-      form,
-    );
+        category_id: categoryId!,
+      });
+      if (res.status == 201) form.reset();
+    };
+
+    const updateSubcategoryHandler = async () => {
+      if (!initialValue) return null;
+      const listOfChangedInputs: Translation[] = [];
+      form.formState.dirtyFields.translations?.forEach(
+        (input, index) =>
+          input && listOfChangedInputs.push(data.translations[index]),
+      );
+      await updateSubcategory({
+        id: initialValue.id,
+        subcategory: { translations: listOfChangedInputs },
+      });
+    };
+    addSubcategoryHandler();
+    updateSubcategoryHandler();
   };
+
+  if (!languages?.length) return null;
 
   return (
     <FormBuilder
       form={form}
-      onSubmit={onSubmit}
-      // buttonTitle={initialValue ? 'ویرایش' : 'افزودن'}
+      onSubmit={handleSubmit}
+      type={initialValue ? 'edit' : 'add'}
       schema={subcategoryFormSchema}>
-      <TranslationTabs
-        form={form}
-        languages={languages}
-        t={t}
-        translationsPath='translations'
-        fields={[
-          {
-            name: 'name',
-            label: 'نام دسته بندی به ',
-            placeholder: 'نام به {lang}',
-          },
-          // Add more fields if needed
-        ]}
-      />
+      <div className='mt-3 mb-8'>
+        <TranslationTabs
+          t={t}
+          form={form}
+          languages={languages}
+          translationsPath={'translations'}
+          selectedLanguageIndex={selectedLanguageIndex}
+          setSelectedLanguageIndex={setSelectedLanguageIndex}
+          fields={[
+            {
+              name: 'name',
+              label: 'نام زیر دسته',
+              placeholder: 'نام به {lang}',
+            },
+          ]}
+        />
+      </div>
       {children}
     </FormBuilder>
   );

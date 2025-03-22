@@ -1,11 +1,12 @@
 import { useQuery } from '@tanstack/react-query';
-import { getCategories } from '../services/get-categories.service';
+import { getCategories } from '../services/category.service';
+import { Category } from '../interfaces/category.interface';
 
-export function useCategories(lang?: string) {
+export function useCategories(details: boolean = false) {
   const { data, isLoading, isError, isFetching } = useQuery({
-    queryKey: lang ? [`categories-${lang}`] : ['categories'],
-    queryFn: async () => await getCategories(lang),
+    queryKey: ['categories'],
+    queryFn: async () => await getCategories(details),
   });
 
-  return { data, isLoading, isError, isFetching };
+  return { data: data as Category[], isLoading, isError, isFetching };
 }

@@ -1,20 +1,18 @@
 import { cn } from '@/common/lib/utils';
 import { useDropzone, Accept } from 'react-dropzone';
 import { DocumentIcon, PhotoIcon } from '@heroicons/react/24/outline';
-import { ReactNode } from 'react';
 
-interface FileWithPreview extends File {
+export interface FileWithPreview extends File {
   preview: string;
 }
 
 interface DropZoneProps {
-  files: FileWithPreview[] | string;
+  files: (FileWithPreview | string)[] | '';
   accept: Accept;
   formKey: string;
   maxFiles: number;
   maxSize?: number; // in bytes
   setFiles: (key: string, files: FileWithPreview[] | FileWithPreview) => void;
-  children?: ReactNode;
 }
 
 interface FilePreviewProps {
@@ -24,7 +22,11 @@ interface FilePreviewProps {
 const FilePreview: React.FC<FilePreviewProps> = ({ file }) => {
   const isFileImage =
     typeof file === 'string'
-      ? file.includes('.png') || file.includes('.jpeg')
+      ? file.includes('.png') ||
+        file.includes('.jpeg') ||
+        file.includes('.jpg') ||
+        file.includes('.webp') ||
+        file.includes('.gif')
       : file.type?.includes('image');
 
   const fileName = typeof file === 'string' ? file : file.name;
@@ -71,7 +73,6 @@ export default function DropZone({
   maxFiles,
   maxSize = 5 * 1024 * 1024, // 5MB default
   setFiles,
-  children,
 }: DropZoneProps) {
   const isMultipleFiles = maxFiles > 1 && Array.isArray(files);
 
@@ -85,7 +86,7 @@ export default function DropZone({
     if (isMultipleFiles) {
       setFiles(formKey, [...(files as FileWithPreview[]), ...filesWithPreview]);
     } else {
-      setFiles(formKey, filesWithPreview[0]);
+      setFiles(formKey, filesWithPreview);
     }
   };
 
@@ -133,8 +134,7 @@ export default function DropZone({
                   file={file}
                 />
               ))
-            : files && <FilePreview file={files as string} />}
-          {children}
+            : files[0] && <FilePreview file={files[0]} />}
         </div>
       </div>
     </div>

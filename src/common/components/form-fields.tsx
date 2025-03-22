@@ -6,16 +6,22 @@ import {
   FormMessage,
 } from './ui/form';
 import { Input } from './ui/input';
-// import {
-//   Select,
-//   SelectContent,
-//   SelectItem,
-//   SelectTrigger,
-//   SelectValue,
-// } from '../ui/select';
+
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from './ui/select';
+
 import { UseFormReturn } from 'react-hook-form';
 import { Path } from 'react-hook-form';
 import { z } from 'zod';
+import { Switch } from './ui/switch';
+import { Label } from './ui/label';
+import { useLanguageStore } from '../stores/language.store';
+import { ReactNode } from 'react';
 
 interface FormInputProps<TFormSchema extends z.ZodType> {
   form: UseFormReturn<z.infer<TFormSchema>>;
@@ -86,56 +92,96 @@ function FormTextarea<TFormSchema extends z.ZodType>({
 }
 
 // Example of a Select field with Zod
-// interface FormSelectProps<TFormSchema extends z.ZodType> {
-//   form: UseFormReturn<z.infer<TFormSchema>>;
-//   name: Path<z.infer<TFormSchema>>;
-//   label: string;
-//   placeholder?: string;
-//   options: Array<{
-//     value: string;
-//     label: string;
-//   }>;
-// }
+interface FormSelectProps<TFormSchema extends z.ZodType> {
+  form: UseFormReturn<z.infer<TFormSchema>>;
+  name: Path<z.infer<TFormSchema>>;
+  label: string;
+  placeholder?: string;
+  options: Array<{
+    value: string;
+    label: string;
+  }>;
+  value?: string;
+  customSelectItem?: ReactNode;
+}
 
-// function FormSelect<TFormSchema extends z.ZodType>({
-//   form,
-//   name,
-//   label,
-//   placeholder,
-//   options,
-// }: FormSelectProps<TFormSchema>) {
-//   return (
-//     <FormField
-//       control={form.control}
-//       name={name}
-//       render={({ field }) => (
-//         <FormItem>
-//           <FormLabel className='block tracking-none font-medium mb-2 mx-1 text-sm text-typography-500'>
-//             {label}
-//           </FormLabel>
-//           <Select onValueChange={field.onChange} defaultValue={field.value}>
-//             <FormControl>
-//               <SelectTrigger>
-//                 <SelectValue placeholder={placeholder} />
-//               </SelectTrigger>
-//             </FormControl>
-//             <SelectContent>
-//               {options.map((option) => (
-//                 <SelectItem key={option.value} value={option.value}>
-//                   {option.label}
-//                 </SelectItem>
-//               ))}
-//             </SelectContent>
-//           </Select>
-//           <FormMessage />
-//         </FormItem>
-//       )}
-//     />
-//   );
-// }
+function FormSelect<TFormSchema extends z.ZodType>({
+  form,
+  name,
+  label,
+  placeholder,
+  options,
+  value,
+  customSelectItem,
+}: FormSelectProps<TFormSchema>) {
+  if (!options || options.length < 1) return null;
+  return (
+    <FormField
+      control={form.control}
+      name={name}
+      render={({ field }) => (
+        <FormItem>
+          <FormLabel className='block tracking-none font-medium mb-3 mx-1 text-sm text-text-light'>
+            {label}
+          </FormLabel>
+          <Select
+            onValueChange={field.onChange}
+            defaultValue={value}>
+            <FormControl>
+              <SelectTrigger>
+                <SelectValue placeholder={placeholder} />
+              </SelectTrigger>
+            </FormControl>
+            <SelectContent>
+              {customSelectItem}
+              {options.map((option) => (
+                <SelectItem
+                  key={option.value}
+                  value={`${option.value}`}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <FormMessage />
+        </FormItem>
+      )}
+    />
+  );
+}
 
-export {
-  FormTextarea,
-  FormInput,
-  // FormSelect
-};
+export function FormSwitch<TFormSchema extends z.ZodType>({
+  form,
+  name,
+  label,
+}: {
+  form: UseFormReturn<z.infer<TFormSchema>>;
+  name: Path<z.infer<TFormSchema>>;
+  label: string;
+}) {
+  const dir = useLanguageStore((state) => state.direction);
+  return (
+    <FormField
+      control={form.control}
+      name={name}
+      render={({ field }) => (
+        <FormItem className='flex items-center'>
+          <FormControl>
+            <div className='flex items-center gap-3'>
+              <Label className='font-medium text-text-light'>{label}</Label>
+              <Switch
+                // value={field.value}
+                checked={field.value}
+                onCheckedChange={field.onChange}
+                dir={dir === 'ltr' ? 'rtl' : 'ltr'}
+                {...field}
+              />
+            </div>
+          </FormControl>
+        </FormItem>
+      )}
+    />
+  );
+}
+
+export { FormTextarea, FormInput, FormSelect };

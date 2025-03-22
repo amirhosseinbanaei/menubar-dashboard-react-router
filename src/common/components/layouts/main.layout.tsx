@@ -29,7 +29,7 @@ function MainLayout() {
           <div className='h-auto w-full py-[18px]'>
             <Navbar />
           </div>
-          <div className='h-auto w-full' dir={dir}>
+          <div className='h-auto w-full'>
             <Outlet />
           </div>
         </div>

@@ -50,7 +50,7 @@ function App() {
         />
         <ReactQueryDevtools
           initialIsOpen={false}
-          position='right'
+          position='left'
         />
       </QueryClientProvider>
     </Router>

@@ -1,11 +1,11 @@
-import { UseFormReturn } from 'react-hook-form';
+import { Path, UseFormReturn } from 'react-hook-form';
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
 } from '@/common/components/ui/tabs';
-import { FormInput } from '@/common/components/form-fields';
+import { FormInput, FormTextarea } from '@/common/components/form-fields';
 import { z } from 'zod';
 import { Language } from '@/modules/languages/interfaces/language.interface';
 import { TFunction } from 'i18next';
@@ -22,6 +22,8 @@ interface TranslationTabsProps<TFormSchema extends z.ZodType> {
   translationsPath: string;
   fields: TranslationField[];
   t: TFunction;
+  selectedLanguageIndex: number;
+  setSelectedLanguageIndex: (index: number) => void;
 }
 
 export function TranslationTabs<TFormSchema extends z.ZodType>({
@@ -30,6 +32,8 @@ export function TranslationTabs<TFormSchema extends z.ZodType>({
   translationsPath,
   fields,
   t,
+  selectedLanguageIndex,
+  setSelectedLanguageIndex,
 }: TranslationTabsProps<TFormSchema>) {
   if (!languages?.length) return null;
   const defaultLanguage = languages[0].language_code;
@@ -37,19 +41,25 @@ export function TranslationTabs<TFormSchema extends z.ZodType>({
   return (
     <Tabs
       defaultValue={defaultLanguage}
-      className='flex flex-col gap-1 rounded-lg p-1 w-full hover:cursor-pointer bg-transparent my-5'
+      value={languages[selectedLanguageIndex].language_code}
+      onValueChange={(value) =>
+        setSelectedLanguageIndex(
+          languages.findIndex((lang) => lang.language_code === value),
+        )
+      }
+      className='flex flex-col gap-8 rounded-lg w-full hover:cursor-pointer bg-transparent'
       dir='rtl'>
-      <TabsList className='mb-5 w-full flex rounded-sm items-center gap-3'>
+      <TabsList className='w-full flex rounded-sm items-center gap-3'>
         {languages.map((lang) => (
           <TabsTrigger
-            className='pl-3 bg-gray-100 border border-primary
-           shadow-c-xl rounded-lg hover:cursor-pointer text-sm data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow flex gap-3 items-center'
-            key={lang.language_code}
+            key={`translation-tab-trigger-${lang.language_code}`}
+            className='px-3 py-2 bg-gray-100 
+           shadow-c-xl rounded-sm hover:cursor-pointer text-sm data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow flex gap-3 items-center'
             value={lang.language_code}>
-            <div className='size-7 relative rounded-full bg-gray-100'>
+            <div className='w-8 h-6 relative rounded-sm bg-gray-100'>
               <img
                 src={`http://localhost:4000/uploads/flags/${lang.language_code}`}
-                className='w-full h-full rounded-full'
+                className='w-full h-full rounded'
                 alt=''
               />
             </div>
@@ -60,29 +70,86 @@ export function TranslationTabs<TFormSchema extends z.ZodType>({
 
       {languages.map((lang, langIndex) => (
         <TabsContent
-          key={lang.language_code}
+          key={`translation-tab-content-${lang.language_code}`}
           value={lang.language_code}>
-          <div className='space-y-4'>
-            {fields.map((field) => (
-              <FormInput<TFormSchema>
-                key={`${lang.language_code}-${field.name}`}
-                form={form}
-                name={`${translationsPath}.${langIndex}.${field.name}`}
-                label={`${field.label} ${t(
-                  `languages.fa.${lang.language_code}`,
-                )}`}
-                placeholder={field.placeholder?.replace(
-                  '{lang}',
-                  lang.language_name,
-                )}
-              />
-            ))}
+          <span className='flex flex-col gap-8'>
+            {fields.map((field) => {
+              if (field.name === 'name') {
+                return (
+                  <FormInput<TFormSchema>
+                    key={`translation-input-${lang.language_code}-${field.name}`}
+                    form={form}
+                    name={
+                      `${translationsPath}.${langIndex}.${field.name}` as Path<
+                        z.infer<TFormSchema>
+                      >
+                    }
+                    label={`${field.label} ${t(
+                      `languages.fa.${lang.language_code}`,
+                    )}`}
+                    placeholder={field.placeholder?.replace(
+                      '{lang}',
+                      lang.language_name,
+                    )}
+                  />
+                );
+              }
+              if (field.name === 'description') {
+                return (
+                  <FormTextarea<TFormSchema>
+                    key={`${lang.language_code}-${field.name}`}
+                    form={form}
+                    name={
+                      `${translationsPath}.${langIndex}.${field.name}` as Path<
+                        z.infer<TFormSchema>
+                      >
+                    }
+                    label={`${field.label} ${t(
+                      `languages.fa.${lang.language_code}`,
+                    )}`}
+                    placeholder={field.placeholder?.replace(
+                      '{lang}',
+                      lang.language_name,
+                    )}
+                  />
+                );
+              }
+              // if (field.name === 'subcategories.translations') {
+              //   return (
+              //     <FormInput<TFormSchema>
+              //       key={`translation-input-${lang.language_code}-${field.name}`}
+              //       form={form}
+              //       name={
+              //         `${translationsPath}.${langIndex}.${field.name}` as Path<
+              //           z.infer<TFormSchema>
+              //         >
+              //       }
+              //       label={`${field.label} ${t(
+              //         `languages.fa.${lang.language_code}`,
+              //       )}`}
+              //       placeholder={field.placeholder?.replace(
+              //         '{lang}',
+              //         lang.language_name,
+              //       )}
+                  
+              //     />
+              //     // <div className='w-full flex gap-5 items-end'>
+              //     //   <div className='w-full'>
+              //     //   </div>
+              //     // </div>
+              //   );
+              // }
+            })}
             <input
               type='hidden'
-              {...form.register(`${translationsPath}.${langIndex}.language`)}
+              {...form.register(
+                `${translationsPath}.${langIndex}.language` as Path<
+                  z.infer<TFormSchema>
+                >,
+              )}
               value={lang.language_code}
             />
-          </div>
+          </span>
         </TabsContent>
       ))}
     </Tabs>

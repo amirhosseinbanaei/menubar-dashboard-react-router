@@ -26,7 +26,7 @@ export const SortableList = <T extends { id: string | number }>({
       swapThreshold={1}
       list={items}
       setList={setItems}
-      className={cn(className)}
+      className={cn('w-full', className)}
       onEnd={() => setSortEnd(true)}>
       {items.map((item, index) => {
         return <span key={`${name}-${index}`}>{renderItem(item, index)}</span>;

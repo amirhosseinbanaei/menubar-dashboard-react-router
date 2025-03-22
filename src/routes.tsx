@@ -14,9 +14,14 @@ import { AuthGuard } from './modules/auth/guard/auth.guard';
 import HomePage from './modules/home/pages/home.page';
 import MainLayout from './common/components/layouts/main.layout';
 import CategoriesPage from './modules/categories/pages/categories.page';
-import ItemsPage from './modules/items/pages/items.page';
 import AddCategoryPage from './modules/categories/pages/add-category.page';
 import EditCategoryPage from './modules/categories/pages/edit-category.page';
+import ItemsPage from './modules/items/pages/items.page';
+import AddItemPage from './modules/items/pages/add-item.page';
+import EditItemPage from './modules/items/pages/edit-item.page';
+import ExtraItemsPage from './modules/extra-items/pages/extra-items.page';
+import EditExtraItemPage from './modules/extra-items/pages/edit-extra-item.page';
+import AddExtraItemPage from './modules/extra-items/pages/add-extra-item.page';
 // import MainLayout from './layouts/MainLayout';
 // import AddCategory from './pages/AddCategory';
 // import EditCategory from './pages/EditCategory';
@@ -74,6 +79,26 @@ const AllRoutes = memo(function AllRoutes() {
           <Route
             path='/items'
             element={<AuthGuard element={<ItemsPage />} />}
+          />
+          <Route
+            path='/items/add'
+            element={<AuthGuard element={<AddItemPage />} />}
+          />
+          <Route
+            path='/items/*'
+            element={<AuthGuard element={<EditItemPage />} />}
+          />
+          <Route
+            path='/extra-items'
+            element={<AuthGuard element={<ExtraItemsPage />} />}
+          />
+          <Route
+            path='/extra-items/add'
+            element={<AuthGuard element={<AddExtraItemPage />} />}
+          />
+          <Route
+            path='/extra-items/*'
+            element={<AuthGuard element={<EditExtraItemPage />} />}
           />
           {/* <Route
             path='/categories'

@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { updateCategory } from '../services/category.services';
+import { updateCategory } from '../services/category.service';
 
 export function useUpdateCategory() {
   const queryClient = useQueryClient();
@@ -7,9 +7,12 @@ export function useUpdateCategory() {
   const { isPending, mutateAsync } = useMutation({
     mutationFn: async ({ id, category }: { id: number; category: FormData }) =>
       await updateCategory(id, category),
-    onSuccess: () => {
+    onSuccess: (res) => {
       queryClient.invalidateQueries({
         queryKey: ['categories'],
+      });
+      queryClient.invalidateQueries({
+        queryKey: [`category-${res.data.data.id}`],
       });
     },
   });

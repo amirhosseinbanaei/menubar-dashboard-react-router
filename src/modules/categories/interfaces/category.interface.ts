@@ -1,5 +1,5 @@
 import { Translation } from '@/common/interfaces/translation.interface';
-import { Subcategory } from './create-subcategory.interface';
+import { Subcategory } from './subcategory.interface';
 
 export interface Category {
   id: number;

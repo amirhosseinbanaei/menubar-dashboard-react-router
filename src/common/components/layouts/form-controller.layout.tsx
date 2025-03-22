@@ -12,7 +12,7 @@ function FormControllerLayout({
   return (
     <div
       className={cn(
-        'my-8 grid grid-cols-1 gap-x-6 gap-y-8 md:grid-cols-2 lg:grid-cols-3',
+        'my-8 grid grid-cols-1 gap-5 gap-y-8 md:grid-cols-2 lg:grid-cols-3',
         className,
       )}>
       {children}

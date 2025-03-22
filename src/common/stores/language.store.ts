@@ -21,20 +21,25 @@ const getDirection = (lang: Language): 'rtl' | 'ltr' => {
 
 export const useLanguageStore = create<LanguageStore>()(
   persist(
-    (set) => ({
-      // Initial state
-      current: 'fa',
-      direction: 'rtl',
+    (set) => {
+      document.body.dir = 'rtl';
+      return {
+        // Initial state
+        current: 'fa',
+        direction: 'rtl',
 
-      // Actions
-      setLanguage: (lang) => {
-        i18n.changeLanguage(lang);
-        set({
-          current: lang,
-          direction: getDirection(lang),
-        });
-      },
-    }),
+        // Actions
+        setLanguage: (lang) => {
+          i18n.changeLanguage(lang);
+          const dir = getDirection(lang);
+          set({
+            current: lang,
+            direction: dir,
+          });
+          document.body.dir = dir;
+        },
+      };
+    },
     {
       name: 'language-storage',
       onRehydrateStorage: () => (state) => {

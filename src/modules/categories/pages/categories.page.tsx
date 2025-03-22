@@ -18,7 +18,9 @@ export default function CategoriesPage() {
   const [sortEnd, setSortEnd] = useState<boolean>(false);
 
   useEffect(() => {
-    if (categories) setSortableItems(categories);
+    if (categories) {
+      setSortableItems(categories);
+    }
   }, [categories]);
 
   const onDelete = async (id: number) => {
@@ -66,13 +68,13 @@ export default function CategoriesPage() {
           )}
         </span>
 
-        <div className='my-3 h-auto w-full overflow-x-auto rounded-sm bg-transparent shadow-c-xl'>
+        <div className='my-8 h-auto w-full overflow-x-auto rounded-sm bg-transparent shadow-c-xl'>
           <SortableList
             name='categories-card'
             items={sortableItems}
             setItems={setSortableItems}
             setSortEnd={setSortEnd}
-            className='flex h-auto w-auto flex-shrink-0 flex-col gap-5 bg-transparent md:w-full'
+            className='bg-transparent w-full flex flex-col flex-shrink-0 gap-5'
             renderItem={(category, index) => (
               <VerticalSortableCard
                 data={category}

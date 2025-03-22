@@ -1,67 +1,92 @@
 import { ContentSection } from '@/common/components/content-section';
-import {
-  AddButton,
-  ChangeOrderButton,
-} from '@/common/components/renderer-buttons';
 import { SortableList } from '@/common/components/stj';
-import VerticalSortableCard from '@/common/components/vertical-sortable-card';
-import { useState } from 'react';
-
-// Components
-// import { BouncingLoaderWithContainer } from '../components/Loaders/Bouncing';
-
-// Custom Hooks
-// import useReactQuery from '../hooks/useReactQuery';
-
-// Data
-// import { LanguageContext } from '../contexts/LanguageContext';
-// import { getCategories } from '../services/Axios/Requests/Category';
-// import Card from '../components/Card/Card';
-
+import { useEffect, useState } from 'react';
+import { Item } from '../interfaces/item.interface';
+import { useItems } from '../hooks/useItems';
+import { useDeleteItem } from '../hooks/useDeleteItem';
+import { Link } from 'react-router';
+import { Button } from '@/common/components/ui/button';
+import { listingOrders } from '@/common/services/listing-orders.service';
+import ItemsCard from '../components/item-cards';
 export default function ItemsPage() {
-  // const { mainData, isLoading: isLoadingCategories } = useReactQuery(
-  //   'Categories',
-  //   getCategories,
-  // );
-  // const { language } = useContext(LanguageContext);
+  const { data: items } = useItems();
+  const { mutateAsync: deleteItem } = useDeleteItem();
+  const [sortableItems, setSortableItems] = useState<Item[]>([]);
+  const [shouldSort, setShouldSort] = useState<boolean>(false);
+  const [sortEnd, setSortEnd] = useState<boolean>(false);
 
-  const [tasks, setTasks] = useState([
-    { id: 1, title: 'Complete project', completed: false },
-    { id: 2, title: 'Review code', completed: true },
-    { id: 3, title: 'Deploy to production', completed: false },
-  ]);
+  useEffect(() => {
+    if (items) {
+      const sortItemsByOrder = items.sort(
+        (a: Item, b: Item) => a.order - b.order,
+      );
+      setSortableItems(sortItemsByOrder);
+    }
+  }, [items]);
 
+  const onDelete = async (id: number) => {
+    await deleteItem(id);
+  };
+
+  useEffect(() => {
+    if (sortEnd) {
+      const newSortedData = sortableItems.map((item, index) => {
+        return { id: item.id, order: index + 1 };
+      });
+      listingOrders('items', { orders: newSortedData });
+      setSortEnd(false);
+    }
+  }, [sortableItems, sortEnd]);
+
+  // const onSort = async (sortable: Sortable | null, store: Store) => {
+  //   console.log(sortable);
+  //   console.log(store);
+  // };
   return (
     <>
       <ContentSection title={'محصولات'}>
-        <div className='w-full h-20 flex bg-gray-200 mb-8'></div>
         <span className='mb-6 flex gap-x-5'>
-          <AddButton
-            title='افزودن محصول'
-            href='/items/add'
-          />
-          <ChangeOrderButton />
+          <Link to={!shouldSort ? '/items/add' : ''}>
+            <Button
+              disabled={shouldSort}
+              variant={'primary'}>
+              افزودن محصول
+            </Button>
+          </Link>
+
+          {!shouldSort ? (
+            <Button
+              variant={'secondary'}
+              onClick={() => setShouldSort(!shouldSort)}>
+              ویرایش ترتیب نمایش
+            </Button>
+          ) : (
+            <Button
+              variant={'primary'}
+              onClick={() => setShouldSort(!shouldSort)}>
+              اعمال تغییرات
+            </Button>
+          )}
         </span>
 
         <div className='my-3 h-auto w-full overflow-x-auto rounded-sm bg-transparent shadow-c-xl'>
           <SortableList
             name='items-card'
-            items={tasks}
-            onReorder={setTasks}
+            items={sortableItems}
+            setItems={setSortableItems}
+            setSortEnd={setSortEnd}
             className='flex h-auto w-auto flex-shrink-0 flex-col gap-5 bg-transparent md:w-full'
             renderItem={(item, index) => (
-              <VerticalSortableCard
+              <ItemsCard
                 data={item}
                 index={index}
-                shouldSort={false}
-                editLink={`/categories/${item.id}`}
+                shouldSort={shouldSort}
+                editLink={`/items/${item.id}`}
                 dialogConfig={{
                   title: 'حذف محصول',
                   description: 'آیا از حذف محصول',
                 }}
-                onDelete={() => {
-                  console.log('deleted');
-                }}
+                onDelete={() => onDelete(item.id)}
               />
             )}
           />

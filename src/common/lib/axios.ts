@@ -2,7 +2,12 @@ import axios from 'axios';
 import { t } from 'i18next';
 import toast from 'react-hot-toast';
 const axiosInstance = axios.create({
-  baseURL: 'http://localhost:4000/',
+  baseURL: 'http://localhost:4000',
+});
+
+axiosInstance.interceptors.request.use((config) => {
+  console.log(config.data);
+  return config;
 });
 
 axiosInstance.interceptors.response.use(

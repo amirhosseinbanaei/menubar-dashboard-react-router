@@ -1,4 +1,3 @@
-import { Button } from '@/common/components/ui/button';
 import {
   Dialog,
   DialogClose,
@@ -8,17 +7,20 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/common/components/ui/dialog';
-import { ReactNode } from 'react';
+import SubcategoryForm from './subcategory-form';
+import { Button } from '@/common/components/ui/button';
+import { Subcategory } from '../interfaces/subcategory.interface';
 
 interface SubcategoryDialogProps {
-  trigger: ReactNode;
-  title: string;
-  children: ReactNode;
+  trigger: React.ReactNode;
+  initialFormValue?: Subcategory;
+  type: 'add' | 'edit' | 'add-in-category';
 }
-export default function SubcategoryDialog({
+
+function SubcategoryDialog({
+  type,
   trigger,
-  title,
-  children,
+  initialFormValue,
 }: SubcategoryDialogProps) {
   return (
     <Dialog>
@@ -26,27 +28,29 @@ export default function SubcategoryDialog({
 
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
+          <DialogTitle>
+            {type === 'edit' ? 'ویرایش زیر دسته' : 'افزودن زیر دسته'}
+          </DialogTitle>
         </DialogHeader>
-        {children}
-        <DialogFooter>
-          <DialogClose
-            asChild
-            className='w-1/2'>
-            <Button variant={'secondary'}>انصراف</Button>
-          </DialogClose>
-          <DialogClose
-            asChild
-            className='w-1/2'>
+
+        <SubcategoryForm initialValue={initialFormValue}>
+          <DialogFooter>
+            <DialogClose
+              asChild
+              className='w-1/2'>
+              <Button variant={'secondary'}>انصراف</Button>
+            </DialogClose>
             <Button
+              type='submit'
               variant={'primary'}
-              //   onClick={onDelete}
-            >
-              افزودن
+              className='w-1/2'>
+              {type === 'edit' ? 'ویرایش' : 'افزودن'}
             </Button>
-          </DialogClose>
-        </DialogFooter>
+          </DialogFooter>
+        </SubcategoryForm>
       </DialogContent>
     </Dialog>
   );
 }
+
+export { SubcategoryDialog };

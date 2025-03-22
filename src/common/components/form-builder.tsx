@@ -14,6 +14,7 @@ interface FormBuilderProps<TFormSchema extends z.ZodType> {
   children: ReactNode;
   buttonTitle?: string;
   schema: TFormSchema;
+  type: 'add' | 'edit';
 }
 
 export function FormBuilder<TFormSchema extends z.ZodType>({
@@ -22,6 +23,7 @@ export function FormBuilder<TFormSchema extends z.ZodType>({
   children,
   buttonTitle,
   schema,
+  type,
 }: FormBuilderProps<TFormSchema>) {
   const handleSubmit = async (data: z.infer<TFormSchema>) => {
     const validatedData = await schema.parseAsync(data);
@@ -33,11 +35,15 @@ export function FormBuilder<TFormSchema extends z.ZodType>({
       <form onSubmit={form.handleSubmit(handleSubmit)}>
         {children}
         {buttonTitle && (
-          <div className='w-full h-auto flex flex-col items-end my-5'>
+          <div className='w-full h-auto flex flex-col items-end mt-8 mb-3'>
             <Button
               type='submit'
               variant='primary'
-              disabled={!form.formState.isValid || form.formState.isSubmitting}
+              disabled={
+                !form.formState.isValid ||
+                form.formState.isSubmitting ||
+                (type === 'edit' && !form.formState.isDirty)
+              }
               className={`${
                 (form.formState.isSubmitting || !form.formState.isValid) &&
                 'opacity-75'
