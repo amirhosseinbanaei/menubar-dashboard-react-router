@@ -3,18 +3,19 @@ import { Form } from './ui/form';
 import { UseFormReturn } from 'react-hook-form';
 import { ReactNode } from 'react';
 import { z } from 'zod';
-// import { DevTool } from '@hookform/devtools';
+import { DevTool } from '@hookform/devtools';
 
 interface FormBuilderProps<TFormSchema extends z.ZodType> {
   form: UseFormReturn<z.infer<TFormSchema>>;
   onSubmit: (
-    // form: UseFormReturn<z.infer<TFormSchema>>,
     data: z.infer<TFormSchema>,
+    form: UseFormReturn<z.infer<TFormSchema>>,
   ) => void;
   children: ReactNode;
   buttonTitle?: string;
   schema: TFormSchema;
   type: 'add' | 'edit';
+  buttonType?: 'submit' | 'button';
 }
 
 export function FormBuilder<TFormSchema extends z.ZodType>({
@@ -24,10 +25,11 @@ export function FormBuilder<TFormSchema extends z.ZodType>({
   buttonTitle,
   schema,
   type,
+  buttonType = 'submit',
 }: FormBuilderProps<TFormSchema>) {
   const handleSubmit = async (data: z.infer<TFormSchema>) => {
     const validatedData = await schema.parseAsync(data);
-    return onSubmit(validatedData);
+    return onSubmit(validatedData, form);
   };
 
   return (
@@ -37,7 +39,7 @@ export function FormBuilder<TFormSchema extends z.ZodType>({
         {buttonTitle && (
           <div className='w-full h-auto flex flex-col items-end mt-8 mb-3'>
             <Button
-              type='submit'
+              type={buttonType}
               variant='primary'
               disabled={
                 !form.formState.isValid ||
@@ -52,7 +54,7 @@ export function FormBuilder<TFormSchema extends z.ZodType>({
             </Button>
           </div>
         )}
-        {/* <DevTool control={form.control} /> */}
+        <DevTool control={form.control} />
       </form>
     </Form>
   );

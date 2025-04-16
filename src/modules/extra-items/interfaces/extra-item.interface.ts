@@ -10,3 +10,5 @@ export interface ExtraItem {
   is_hidden: boolean;
   created_at: Date;
 }
+
+export type ExtraItemInItem = Omit<ExtraItem, 'items'>;

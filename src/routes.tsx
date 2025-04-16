@@ -22,6 +22,13 @@ import EditItemPage from './modules/items/pages/edit-item.page';
 import ExtraItemsPage from './modules/extra-items/pages/extra-items.page';
 import EditExtraItemPage from './modules/extra-items/pages/edit-extra-item.page';
 import AddExtraItemPage from './modules/extra-items/pages/add-extra-item.page';
+import TagsPage from './modules/tags/pages/tags.page';
+import AddTagPage from './modules/tags/pages/add-tag.page';
+import EditTagPage from './modules/tags/pages/edit-tag.page';
+import AboutPage from './modules/about/pages/about.page';
+import CustomersPage from './modules/customers/pages/customers.page';
+import OrdersPage from './modules/orders/pages/orders.page';
+import CustomizationPage from './modules/customization/page/customization.page';
 // import MainLayout from './layouts/MainLayout';
 // import AddCategory from './pages/AddCategory';
 // import EditCategory from './pages/EditCategory';
@@ -99,6 +106,46 @@ const AllRoutes = memo(function AllRoutes() {
           <Route
             path='/extra-items/*'
             element={<AuthGuard element={<EditExtraItemPage />} />}
+          />
+          <Route
+            path='/extra-items'
+            element={<AuthGuard element={<ExtraItemsPage />} />}
+          />
+          <Route
+            path='/extra-items/add'
+            element={<AuthGuard element={<AddExtraItemPage />} />}
+          />
+          <Route
+            path='/extra-items/*'
+            element={<AuthGuard element={<EditExtraItemPage />} />}
+          />
+          <Route
+            path='/tags'
+            element={<AuthGuard element={<TagsPage />} />}
+          />
+          <Route
+            path='/tags/add'
+            element={<AuthGuard element={<AddTagPage />} />}
+          />
+          <Route
+            path='/tags/*'
+            element={<AuthGuard element={<EditTagPage />} />}
+          />
+          <Route
+            path='/about'
+            element={<AuthGuard element={<AboutPage />} />}
+          />
+          <Route
+            path='/customers'
+            element={<AuthGuard element={<CustomersPage />} />}
+          />
+          <Route
+            path='/orders'
+            element={<AuthGuard element={<OrdersPage />} />}
+          />
+          <Route
+            path='/customization'
+            element={<AuthGuard element={<CustomizationPage />} />}
           />
           {/* <Route
             path='/categories'

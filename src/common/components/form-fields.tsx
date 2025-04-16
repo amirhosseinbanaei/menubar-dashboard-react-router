@@ -26,9 +26,10 @@ import { ReactNode } from 'react';
 interface FormInputProps<TFormSchema extends z.ZodType> {
   form: UseFormReturn<z.infer<TFormSchema>>;
   name: Path<z.infer<TFormSchema>>;
-  label: string;
+  label?: string;
   placeholder?: string;
   type?: string;
+  inputProps?: React.ComponentProps<'input'>
 }
 
 function FormInput<TFormSchema extends z.ZodType>({
@@ -36,8 +37,8 @@ function FormInput<TFormSchema extends z.ZodType>({
   name,
   label,
   placeholder,
-  type = 'text',
-}: FormInputProps<TFormSchema>) {
+  type = 'text'
+}:  FormInputProps<TFormSchema>) {
   return (
     <FormField
       control={form.control}
@@ -101,7 +102,7 @@ interface FormSelectProps<TFormSchema extends z.ZodType> {
     value: string;
     label: string;
   }>;
-  value?: string;
+  defaultValue?: string;
   customSelectItem?: ReactNode;
 }
 
@@ -111,7 +112,7 @@ function FormSelect<TFormSchema extends z.ZodType>({
   label,
   placeholder,
   options,
-  value,
+  defaultValue,
   customSelectItem,
 }: FormSelectProps<TFormSchema>) {
   if (!options || options.length < 1) return null;
@@ -119,33 +120,37 @@ function FormSelect<TFormSchema extends z.ZodType>({
     <FormField
       control={form.control}
       name={name}
-      render={({ field }) => (
-        <FormItem>
-          <FormLabel className='block tracking-none font-medium mb-3 mx-1 text-sm text-text-light'>
-            {label}
-          </FormLabel>
-          <Select
-            onValueChange={field.onChange}
-            defaultValue={value}>
-            <FormControl>
-              <SelectTrigger>
-                <SelectValue placeholder={placeholder} />
-              </SelectTrigger>
-            </FormControl>
-            <SelectContent>
-              {customSelectItem}
-              {options.map((option) => (
-                <SelectItem
-                  key={option.value}
-                  value={`${option.value}`}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <FormMessage />
-        </FormItem>
-      )}
+      render={({ field }) => {
+        return (
+          <FormItem>
+            <FormLabel className='block tracking-none font-medium mb-3 mx-1 text-sm text-text-light'>
+              {label}
+            </FormLabel>
+            <Select
+              onValueChange={field.onChange}
+              {...(!defaultValue && { value: field.value })}
+              {...(defaultValue && { defaultValue: defaultValue })}
+              >
+              <FormControl>
+                <SelectTrigger>
+                  <SelectValue placeholder={placeholder} />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                {customSelectItem}
+                {options.map((option) => (
+                  <SelectItem
+                    key={option.value}
+                    value={`${option.value}`}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <FormMessage />
+          </FormItem>
+        );
+      }}
     />
   );
 }

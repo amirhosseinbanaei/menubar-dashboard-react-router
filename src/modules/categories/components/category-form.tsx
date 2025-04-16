@@ -8,7 +8,8 @@ import { useLanguages } from '@/modules/languages/hooks/useLanguages';
 import type { Category } from '../interfaces/category.interface';
 import { TranslationTabs } from '@/common/components/translation-tabs';
 import { useTranslation } from 'react-i18next';
-import FormControllerLayout from '@/common/components/layouts/form-controller.layout';
+import { FormSubcategorySection } from './form-subcategory-section';
+
 // Constants
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 const ACCEPTED_IMAGE_TYPES = [
@@ -22,6 +23,19 @@ const ACCEPTED_IMAGE_TYPES = [
 const categoryTranslationSchema = z.object({
   language: z.string(),
   name: z.string().min(2, 'نام دسته بندی الزامی است'),
+});
+
+const subcategoryTranslationSchema = z.object({
+  language: z.string(),
+  name: z.string().min(2, 'نام زیر دسته الزامی است'),
+});
+
+const subcategorySchema = z.object({
+  id: z.number(),
+  order: z.number(),
+  translations: z
+    .array(subcategoryTranslationSchema)
+    .min(1, 'حداقل یک ترجمه الزامی است'),
 });
 
 const categoryFormSchema = z.object({
@@ -47,15 +61,16 @@ const categoryFormSchema = z.object({
   translations: z
     .array(categoryTranslationSchema)
     .min(1, 'حداقل یک ترجمه الزامی است'),
-  subcategories: z.object({
-    translations: z.array(categoryTranslationSchema).optional(),
-  }),
+  subcategories: z.array(subcategorySchema),
 });
 
 export type CategoryTranslationValues = z.infer<
   typeof categoryTranslationSchema
 >;
-
+export type SubcategoryTranslationValues = z.infer<
+  typeof subcategoryTranslationSchema
+>;
+export type SubcategoryFormValues = z.infer<typeof subcategorySchema>;
 export type CategoryFormValues = z.infer<typeof categoryFormSchema>;
 
 interface CategoryFormProps {
@@ -79,7 +94,7 @@ function CategoryForm({
   const defaultValues: CategoryFormValues = {
     image: '',
     translations: [],
-    subcategories: { translations: [] },
+    subcategories: [],
   };
 
   const form = useForm<CategoryFormValues>({
@@ -89,22 +104,32 @@ function CategoryForm({
 
   useEffect(() => {
     if (!languages) return;
-
     const translations = languages.map((lang) => {
       const foundTranslation = initialValue?.translations.find(
         (t) => t.language === lang.language_code,
       );
-
       return {
         language: lang.language_code,
         name: foundTranslation?.name || '',
       };
     });
-
+    const subcategories =
+      initialValue?.subcategories?.map((sub) => ({
+        translations: languages.map((lang) => {
+          const found = sub.translations.find(
+            (t) => t.language === lang.language_code,
+          );
+          return {
+            language: lang.language_code,
+            name: found?.name || '',
+          };
+        }),
+      })) || [];
     form.reset({
       ...defaultValues,
       translations,
-      image: initialValue ? [initialValue?.image] : '',
+      subcategories,
+      image: initialValue?.image ? [initialValue.image] : '',
     });
   }, [languages, initialValue, form.reset]);
 
@@ -120,23 +145,22 @@ function CategoryForm({
       <div className='mb-8'>
         <CategoryFormImageSection form={form} />
       </div>
-      <FormControllerLayout>
-        <TranslationTabs
-          t={t}
-          form={form}
-          languages={languages}
-          translationsPath='translations'
-          selectedLanguageIndex={selectedLanguageIndex}
-          setSelectedLanguageIndex={setSelectedLanguageIndex}
-          fields={[
-            {
-              name: 'name',
-              label: 'نام دسته بندی',
-              placeholder: 'نام به {lang}',
-            },
-          ]}
-        />
-      </FormControllerLayout>
+      <TranslationTabs
+        t={t}
+        form={form}
+        languages={languages}
+        translationsPath='translations'
+        selectedLanguageIndex={selectedLanguageIndex}
+        setSelectedLanguageIndex={setSelectedLanguageIndex}
+        fields={[
+          {
+            name: 'name',
+            label: 'نام دسته بندی',
+            placeholder: 'نام به {lang}',
+          },
+        ]}
+      />
+      {!initialValue && <FormSubcategorySection categoryForm={form} />}
       {children}
     </FormBuilder>
   );
@@ -151,18 +175,16 @@ const CategoryFormImageSection = memo(function CategoryFormImageSection({
     <Controller
       name='image'
       control={form.control}
-      render={({ field: { onChange, value } }) => {
-        return (
-          <DropZone
-            files={value}
-            accept={{ 'image/*': ['.png', '.jpg', '.jpeg', '.webp'] }}
-            formKey='image'
-            maxFiles={1}
-            maxSize={MAX_FILE_SIZE}
-            setFiles={(_, files) => onChange(files)}
-          />
-        );
-      }}
+      render={({ field: { onChange, value } }) => (
+        <DropZone
+          files={value}
+          accept={{ 'image/*': ['.png', '.jpg', '.jpeg', '.webp'] }}
+          formKey='image'
+          maxFiles={1}
+          maxSize={MAX_FILE_SIZE}
+          setFiles={(_, files) => onChange(files)}
+        />
+      )}
     />
   );
 });

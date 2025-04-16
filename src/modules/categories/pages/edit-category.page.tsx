@@ -7,14 +7,14 @@ import { Button } from '@/common/components/ui/button';
 import { useEffect, useState } from 'react';
 import { Subcategory } from '../interfaces/subcategory.interface';
 import { UseFormReturn } from 'react-hook-form';
-import { SubcategoryCard } from '../components/subcategory-card';
-import { SortableList } from '@/common/components/stj';
 import { listingOrders } from '@/common/services/listing-orders.service';
 import { useDeleteSubcategory } from '../hooks/useDeleteSubcategory';
 import { Category } from '../interfaces/category.interface';
 import { useSubcategories } from '../hooks/useSubcategories';
 import { Translation } from '@/modules/languages/interfaces/translation.interface';
 import { SubcategoryDialog } from '../components/subcategory-dialog';
+import { Card, CardDeleteDialog } from '@/common/components/ui';
+import { DragDrop } from '@/common/components/drag-drop/drag-drop';
 
 export default function EditCategoryPage() {
   const pathname = useLocation().pathname;
@@ -73,7 +73,6 @@ function SubcategorySection({ category }: { category: Category }) {
     categoryId: category.id,
   });
   const [sortableItems, setSortableItems] = useState<Subcategory[]>([]);
-  const [sortEnd, setSortEnd] = useState<boolean>(false);
 
   useEffect(() => {
     if (subcategories) {
@@ -84,18 +83,16 @@ function SubcategorySection({ category }: { category: Category }) {
     }
   }, [subcategories]);
 
-  useEffect(() => {
-    if (sortEnd) {
-      const newSortedData = sortableItems.map((item, index) => {
-        return { id: item.id, order: index + 1 };
-      });
-      listingOrders('subcategories', {
-        category_id: category.id,
-        orders: newSortedData,
-      });
-      setSortEnd(false);
-    }
-  }, [sortableItems, sortEnd]);
+  const handleSort = (newData: Subcategory[]) => {
+    const newSortedData = newData.map((subcategory, index) => {
+      return { id: subcategory.id, order: index + 1 + category.id };
+    });
+    listingOrders('subcategories', {
+      category_id: category.id,
+      orders: newSortedData,
+    });
+    setSortableItems(newData);
+  };
 
   return (
     <ContentSection title={'زیر دسته ها'}>
@@ -104,25 +101,30 @@ function SubcategorySection({ category }: { category: Category }) {
         trigger={<Button variant={'primary'}>افزودن زیر دسته</Button>}
       />
 
-      <SortableList
-        name='subcategories-card'
+      <DragDrop
         items={sortableItems}
-        setItems={setSortableItems}
-        setSortEnd={setSortEnd}
-        className='my-5 flex flex-col flex-shrink-0 gap-5'
-        renderItem={(subcategory, index) => (
-          <SubcategoryCard
-            data={subcategory}
-            index={index}
-            key={`subcategory-${subcategory.id}`}
-            dialogConfig={{
-              title: 'حذف زیر دسته',
-              description: 'آیا از حذف زیر دسته مطمئن هستید؟',
-            }}
-            onDelete={async () => await deleteSubcategory(subcategory.id)}
+        gridColumns={3}
+        onChange={(newSortedData) => handleSort(newSortedData)}
+        className='gap-5 mt-8'
+        direction='grid'
+        renderItem={(subcategory, dragHadnle, _, index) => (
+          <Card
+            index={index + 1}
+            dragHandle={dragHadnle}
+            dragHandleIcon='arrow'
+            title={subcategory.translations[0]?.name}
+            key={`subcategory-card:${subcategory.id}`}
+            actions={
+              <CardDeleteDialog
+                title='آیتم'
+                description='حذف آیتم'
+                onDelete={async () => await deleteSubcategory(subcategory.id)}
+              />
+            }
           />
         )}
       />
+      
     </ContentSection>
   );
 }

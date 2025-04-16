@@ -1,54 +1,35 @@
-import { Badge } from "@/common/components/ui";
-import { numberFormatter } from "@/common/utils/number-formatter";
-import { ColumnDef } from "@tanstack/react-table";
-
-interface OrderItem {
-  id: number;
-  price: number;
-  quantity: number;
-  extra_items: {
-    id: number;
-    price: number;
-    quantity: number;
-  }[];
-}
-
-interface User {
-  id: number;
-  name: string;
-  phone: string;
-  email?: string;
-}
-
-interface Restaurant {
-  id: number;
-  name: string;
-  address: string;
-}
-
-interface Order {
-  id: number;
-  total_amount: string;
-  discount_amount: string;
-  final_amount: string;
-  status: 'pending' | 'processing' | 'completed' | 'cancelled';
-  payment_type: 'cash' | 'card';
-  scheduled_pickup_time: string;
-  items: OrderItem[];
-  user: User;
-  restaurant: Restaurant;
-  created_at: string;
-  updated_at: string;
-}
+import { Badge } from '@/common/components/ui';
+import { numberFormatter } from '@/common/utils/number-formatter';
+import { ColumnDef } from '@tanstack/react-table';
+import { Order } from '../interface/order.interface';
+import { OrderStatus } from '../enums/order-status.enum';
 
 const statusColors = {
-  pending: 'bg-yellow-500',
-  processing: 'bg-blue-500',
-  completed: 'bg-green-500',
-  cancelled: 'bg-red-500',
+  [OrderStatus.PENDING]: 'bg-yellow-500',
+  [OrderStatus.CONFIRMED]: 'bg-blue-500',
+  [OrderStatus.PREPARING]: 'bg-purple-500',
+  [OrderStatus.READY]: 'bg-orange-500',
+  [OrderStatus.COMPLETED]: 'bg-green-500',
+  [OrderStatus.CANCELLED]: 'bg-red-500',
 };
 
-export const OrderTableColumns: ColumnDef<Order>[] = [
+const statusLabels = {
+  [OrderStatus.PENDING]: 'در انتظار پرداخت',
+  [OrderStatus.CONFIRMED]: 'تایید شده',
+  [OrderStatus.PREPARING]: 'در حال آماده سازی',
+  [OrderStatus.READY]: 'آماده',
+  [OrderStatus.COMPLETED]: 'تکمیل شده',
+  [OrderStatus.CANCELLED]: 'لغو شده',
+};
+
+export type OrderValue =
+  | string
+  | number
+  | OrderStatus
+  | Order['items'][0]
+  | Order['items'][0]['extra_items'][0];
+
+export const orderColumns: ColumnDef<Order, OrderValue>[] = [
   {
     accessorKey: 'id',
     header: 'شناسه سفارش',
@@ -57,14 +38,9 @@ export const OrderTableColumns: ColumnDef<Order>[] = [
     accessorKey: 'status',
     header: 'وضعیت',
     cell: ({ row }) => {
-      const status = row.getValue('status') as Order['status'];
+      const status = row.getValue('status') as OrderStatus;
       return (
-        <Badge className={statusColors[status]}>
-          {status === 'pending' && 'در انتظار پرداخت'}
-          {status === 'processing' && 'در حال پردازش'}
-          {status === 'completed' && 'تکمیل شده'}
-          {status === 'cancelled' && 'لغو شده'}
-        </Badge>
+        <Badge className={statusColors[status]}>{statusLabels[status]}</Badge>
       );
     },
   },
@@ -84,7 +60,6 @@ export const OrderTableColumns: ColumnDef<Order>[] = [
       const time = Intl.DateTimeFormat('fa-IR', {
         hour: '2-digit',
         minute: '2-digit',
-        second: '2-digit',
       }).format(date);
       return time;
     },
@@ -93,7 +68,7 @@ export const OrderTableColumns: ColumnDef<Order>[] = [
     accessorKey: 'items',
     header: 'تعداد آیتم‌ها',
     cell: ({ row }) => {
-      const items = row.getValue('items') as OrderItem[];
+      const items = row.getValue('items') as Order['items'];
       return items.reduce((acc, item) => acc + item.quantity, 0);
     },
   },
@@ -101,7 +76,7 @@ export const OrderTableColumns: ColumnDef<Order>[] = [
     accessorKey: 'total_amount',
     header: 'مبلغ کل',
     cell: ({ row }) => {
-      const amount = parseFloat(row.getValue('total_amount'));
+      const amount = row.getValue('total_amount') as number;
       return numberFormatter(amount);
     },
   },
@@ -109,7 +84,7 @@ export const OrderTableColumns: ColumnDef<Order>[] = [
     accessorKey: 'discount_amount',
     header: 'تخفیف',
     cell: ({ row }) => {
-      const amount = parseFloat(row.getValue('discount_amount'));
+      const amount = row.getValue('discount_amount') as number;
       return numberFormatter(amount);
     },
   },
@@ -117,7 +92,7 @@ export const OrderTableColumns: ColumnDef<Order>[] = [
     accessorKey: 'final_amount',
     header: 'مبلغ نهایی',
     cell: ({ row }) => {
-      const amount = parseFloat(row.getValue('final_amount'));
+      const amount = row.getValue('final_amount') as number;
       return numberFormatter(amount);
     },
   },
@@ -127,7 +102,7 @@ export const OrderTableColumns: ColumnDef<Order>[] = [
     cell: ({ row }) => {
       const date = new Date(row.getValue('created_at'));
       const dateStr = new Intl.DateTimeFormat('fa-IR', {
-        year: 'numeric',
+        // year: 'numeric',
         month: 'long',
         day: 'numeric',
       }).format(date);

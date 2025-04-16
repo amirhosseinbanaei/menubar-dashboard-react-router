@@ -14,9 +14,9 @@ export const getItem = async (id: number | string) => {
   }
 };
 
-export const getItems = async () => {
+export const getItems = async (filter?: string) => {
   try {
-    const res = await axiosInstance.get(`/items`);
+    const res = await axiosInstance.get(`/items${filter}`);
     const sortedItems = res.data.data.sort(
       (a: Item, b: Item) => a.order - b.order,
     );

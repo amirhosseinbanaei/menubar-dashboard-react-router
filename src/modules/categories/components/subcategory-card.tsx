@@ -17,23 +17,27 @@ import {
 import { Button } from '@/common/components/ui/button';
 import { Subcategory } from '../interfaces/subcategory.interface';
 import { SubcategoryDialog } from './subcategory-dialog';
+import { SubcategoryFormValues } from './subcategory-form';
+import { UseFormReturn } from 'react-hook-form';
 
-interface VerticalSortableCardProps<T> {
-  data: T;
+interface SubcategoryCardProps {
+  data: Subcategory;
   index: number;
   dialogConfig: {
     title: string;
     description: string;
   };
   onDelete?: () => void;
+  onEdit?: (form: UseFormReturn<SubcategoryFormValues>) => void;
 }
 
-function SubcategoryCard<T extends Subcategory>({
+function SubcategoryCard({
   data,
   index,
   dialogConfig,
   onDelete,
-}: VerticalSortableCardProps<T>) {
+  onEdit,
+}: SubcategoryCardProps) {
   return (
     <div className='flex h-20 w-full items-center justify-start gap-x-4 rounded-sm px-3 shadow-c-xl'>
       <div className='flex h-full w-10 items-center justify-center'>
@@ -48,7 +52,7 @@ function SubcategoryCard<T extends Subcategory>({
 
       <div className='w-40 flex h-full items-center'>
         <h1 className='line-clamp-1 font-bold text-text'>
-          {data.translations[0].name}
+          {data.translations[0]?.name}
         </h1>
       </div>
       <div className='flex h-full w-28 items-center justify-center gap-x-3'>
@@ -62,12 +66,7 @@ function SubcategoryCard<T extends Subcategory>({
             </Button>
           }
           initialFormValue={data}
-          // formAction={async (
-          //   data: SubcategoryFormValues,
-          //   form: UseFormReturn<SubcategoryFormValues>,
-          // ) => {
-          //   console.log(data);
-          // }}
+          customFormSubmition={onEdit}
         />
 
         <Dialog>

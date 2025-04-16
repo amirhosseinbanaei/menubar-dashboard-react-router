@@ -1,11 +1,11 @@
 import { ContentSection } from '@/common/components/content-section';
-
 import ItemForm, { ItemFormValues } from '../components/item-form';
 import { useLocation } from 'react-router';
 import { useItem } from '../hooks/useItem';
 import { useUpdateItem } from '../hooks/useUpdateItem';
 import { UseFormReturn } from 'react-hook-form';
 import { Translation } from '@/modules/languages/interfaces/translation.interface';
+import { formatNumber } from '@/common/utils/numbers.util';
 
 export default function EditItemPage() {
   const pathname = useLocation().pathname;
@@ -14,14 +14,26 @@ export default function EditItemPage() {
   const { mutateAsync: updateItem } = useUpdateItem();
 
   const updateItemAction = async (
-    data: ItemFormValues,
+    data: { tagIds: number[]; extraItemIds: number[] } & ItemFormValues,
     form: UseFormReturn<ItemFormValues>,
   ) => {
     const formData = new FormData();
+    data.price = formatNumber(data.price, {
+      toPersian: false,
+      withCommas: false,
+    });
+    data.discount = formatNumber(data.discount, {
+      toPersian: false,
+      withCommas: false,
+    });
     const changedFormKeys = Object.keys(form.formState.dirtyFields);
 
     formData.append('restaurant_id', '1');
     formData.append('branch_id', '0');
+
+    // Add tag and extra item IDs
+    formData.append('tag_ids', JSON.stringify(data.tagIds));
+    formData.append('extra_item_ids', JSON.stringify(data.extraItemIds));
 
     changedFormKeys.forEach((key) => {
       const findData = data[key as keyof ItemFormValues];
@@ -50,13 +62,14 @@ export default function EditItemPage() {
     });
 
     await updateItem({ id: +id, item: formData });
+    // No need to reset form after update
   };
 
   return (
     <>
       <ContentSection title='ویرایش محصول'>
         {isLoadingItem ? (
-          <h1>amir</h1>
+          <h1>Loading...</h1>
         ) : (
           <ItemForm
             initialValue={item}

@@ -18,6 +18,11 @@ import { useCategories } from '@/modules/categories/hooks/useCategories';
 import { Category } from '@/modules/categories/interfaces/category.interface';
 import { Subcategory } from '@/modules/categories/interfaces/subcategory.interface';
 import { SelectItem } from '@/common/components/ui/select';
+import { Tag } from '@/modules/tags/interfaces/tag.interface';
+import { ExtraItem } from '@/modules/extra-items/interfaces/extra-item.interface';
+import { FormTagsSection } from './form-tags-section';
+import { formatNumber } from '@/common/utils/numbers.util';
+import { FormExtraItemsSection } from './form-extra-items-section';
 
 // Constants
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
@@ -58,15 +63,34 @@ const itemFormSchema = z.object({
   translations: z
     .array(itemTranslationSchema)
     .min(1, 'حداقل یک ترجمه الزامی است'),
-  price: z.number().min(0, 'قیمت باید بیشتر از 0 باشد'),
-  discount: z.number().min(0, 'تخفیف باید بیشتر از 0 باشد'),
+  price: z
+    .string()
+    .regex(/^[\u06F0-\u06F90-9,]+$/, 'قیمت باید فقط شامل اعداد و کاما باشد')
+    .refine((val) => {
+      const numValue = Number(formatNumber(val, { removeCommas: true }));
+      return numValue >= 0;
+    }, 'قیمت باید بزرگتر از صفر باشد')
+    .refine(
+      (val) => formatNumber(val, { removeCommas: true }).length <= 9,
+      'قیمت حداکثر 9 رقم میتواند باشد',
+    ),
+  discount: z
+    .string()
+    .regex(/^[\u06F0-\u06F90-9]+$/, 'تخفیف باید فقط شامل اعداد باشد')
+    .refine((val) => {
+      const numValue = Number(formatNumber(val, { removeCommas: true }));
+      return numValue >= 0 && numValue <= 100;
+    }, 'تخفیف باید بین 0 تا 100 باشد'),
   category_id: z
     .string()
     .min(1, 'دسته بندی الزامی است')
-    .refine((value) => value !== '0', 'قیمت نمی‌تواند برابر با 0 باشد'),
+    .refine((value) => value !== '0', 'قیمت نمی‌تواند برابر با 0 باشد')
+    .default(''),
   subcategory_id: z.string().optional().default('0'),
   is_available: z.boolean().optional(),
   is_hidden: z.boolean().optional(),
+  tags: z.array(z.custom<Tag>()) as z.ZodType<Tag[] | []>,
+  extraItems: z.array(z.custom<ExtraItem>()) as z.ZodType<ExtraItem[] | []>,
 });
 
 export type ItemTranslationValues = z.infer<typeof itemTranslationSchema>;
@@ -75,7 +99,7 @@ export type ItemFormValues = z.infer<typeof itemFormSchema>;
 interface ItemFormProps {
   initialValue?: Item;
   formAction: (
-    data: ItemFormValues,
+    data: { tagIds: number[]; extraItemIds: number[] } & ItemFormValues,
     form: UseFormReturn<ItemFormValues>,
   ) => Promise<void>;
 }
@@ -89,22 +113,35 @@ function ItemForm({ initialValue, formAction }: ItemFormProps) {
   const defaultValues: ItemFormValues = {
     image: '',
     translations: [],
-    price: 0,
-    discount: 0,
-    category_id: '0',
+    price: '0',
+    discount: '0',
+    category_id: '',
     subcategory_id: '0',
     is_available: false,
     is_hidden: false,
+    tags: [],
+    extraItems: [],
   };
 
   const form = useForm<ItemFormValues>({
     resolver: zodResolver(itemFormSchema),
     defaultValues,
+    mode: 'onChange',
   });
 
   const selectedCategoryId = useWatch({
     control: form.control,
     name: 'category_id',
+  });
+
+  const watchPrice = useWatch({
+    control: form.control,
+    name: 'price',
+  });
+
+  const watchDiscount = useWatch({
+    control: form.control,
+    name: 'discount',
   });
 
   useEffect(() => {
@@ -126,14 +163,42 @@ function ItemForm({ initialValue, formAction }: ItemFormProps) {
       ...defaultValues,
       translations,
       image: initialValue ? [initialValue?.image] : '',
-      price: initialValue?.price || 0,
-      discount: initialValue?.discount || 0,
-      category_id: initialValue?.category_id?.toString() || '0',
+      price: initialValue?.price.toString() || '0',
+      discount: initialValue?.discount.toString() || '0',
+      category_id: initialValue?.category_id?.toString() || '',
       subcategory_id: initialValue?.subcategory_id?.toString() || '0',
       is_available: initialValue ? initialValue?.is_available : true,
       is_hidden: initialValue ? initialValue.is_hidden : false,
+      tags: initialValue?.tags || [],
+      extraItems: initialValue?.extra_items || [],
     });
-  }, [languages, initialValue, form]);
+  }, [languages, initialValue, form.reset]);
+
+  useEffect(() => {
+    if (watchPrice) {
+      const formattedPrice = formatNumber(watchPrice, {
+        withCommas: true,
+        toPersian: true,
+      });
+      if (formattedPrice !== watchPrice) {
+        form.setValue('price', formattedPrice, { shouldValidate: true });
+      }
+    }
+  }, [watchPrice, form]);
+
+  useEffect(() => {
+    if (watchDiscount) {
+      const formattedDiscount = formatNumber(watchDiscount, {
+        withCommas: false,
+        toPersian: true,
+      });
+      if (formattedDiscount !== watchDiscount) {
+        form.setValue('discount', formattedDiscount, {
+          shouldValidate: true,
+        });
+      }
+    }
+  }, [watchDiscount, form]);
 
   const categoryOptions = useMemo(
     () =>
@@ -144,7 +209,7 @@ function ItemForm({ initialValue, formAction }: ItemFormProps) {
     [categories],
   );
 
-  const subcategoryOptions: [] = useMemo(() => {
+  const subcategoryOptions = useMemo(() => {
     if (!selectedCategoryId || !categories) return [];
 
     const selectedCategory = categories.find(
@@ -156,97 +221,26 @@ function ItemForm({ initialValue, formAction }: ItemFormProps) {
         selectedCategory?.subcategories?.map((subcategory: Subcategory) => {
           return {
             value: String(subcategory.id),
-            label: subcategory.translations[0].name,
+            label: subcategory.translations[0]?.name,
           };
         }) || []
       );
     }
   }, [selectedCategoryId, categories]);
 
+  const handleSubmitForm = async (data: ItemFormValues) => {
+    const tagIds = data.tags?.map((tag) => tag.id) || [];
+    const extraItemIds =
+      data.extraItems?.map((extraItem) => extraItem.id) || [];
+    formAction({ ...data, tagIds, extraItemIds }, form);
+  };
+
   if (!languages?.length) return null;
-
-  // const handleSubmit = async (data: ItemFormValues) => {
-  //   const formData = new FormData();
-  //   const changedFormKeys = Object.keys(form.formState.dirtyFields);
-
-  //   formData.append('restaurant_id', '1');
-  //   formData.append('branch_id', '0');
-
-  //   if (initialValue) {
-  //     if (changedFormKeys.includes('translations')) {
-  //       const numberOfInput = form.formState.dirtyFields.translations
-  //         ?.length as number;
-  //       const updatedTranslations = [];
-  //       for (let i = 0; i < numberOfInput; i++) {
-  //         updatedTranslations.push(data.translations[i]);
-  //       }
-
-  //       formData.append('translations', JSON.stringify(updatedTranslations));
-  //     }
-  //     changedFormKeys.forEach((key) => console.log(key));
-  //     // appendSimpleValueToFormData();
-  //   } else {
-  //     Object.entries(data).forEach(([formKey, formValue]) => {
-  //       if (typeof formValue === 'string') {
-  //         formData.append(formKey, formValue);
-  //       } else {
-  //         if (formKey === 'image') {
-  //           formData.append('image', data.image[0]);
-  //         } else {
-  //           formData.append(formKey, JSON.stringify(formValue));
-  //         }
-  //       }
-  //     });
-  //   }
-
-  //   // await formAction(formData, form);
-
-  //   // if (!initialValue) {
-  //   //   formData.append('image', data.image[0]);
-  //   //   formData.append('translations', JSON.stringify(data.translations));
-  //   //   formData.append('restaurant_id', '1');
-  //   //   formData.append('branch_id', '0');
-  //   //   formData.append('category_id', '6');
-  //   //   formData.append('subcategory_id', '15');
-  //   //   formData.append('price', JSON.stringify(data.price));
-  //   //   formData.append('discount', JSON.stringify(data.discount));
-  //   //   formData.append('is_hidden', JSON.stringify(data.is_hidden));
-  //   //   formData.append('is_available', JSON.stringify(data.is_available));
-  //   //   await formAction(formData, form);
-  //   // } else {
-  //   //   // const { dirtyFields } = form.formState;
-  //   //   // console.log(dirtyFields);
-  //   //   // if (dirtyFields.translations) {
-  //   //   //   formData.append('translations', JSON.stringify(data.translations));
-  //   //   // }
-  //   //   // if (dirtyFields.images) {
-  //   //   //   formData.append('image', data.images[0]);
-  //   //   // }
-  //   //   // if (dirtyFields.category) {
-  //   //   //   formData.append('category_id', data.category);
-  //   //   // }
-  //   //   // if (dirtyFields.subcategory) {
-  //   //   //   formData.append('subcategory_id', data.subcategory);
-  //   //   // }
-  //   //   // if (dirtyFields.price) {
-  //   //   //   formData.append('price', String(data.price));
-  //   //   // }
-  //   //   // if (dirtyFields.discount) {
-  //   //   //   formData.append('discount', String(data.discount));
-  //   //   // }
-  //   //   // if (dirtyFields.isAvailable) {
-  //   //   //   formData.append('is_available', String(data.isAvailable));
-  //   //   // }
-  //   //   // if (dirtyFields.isHidden) {
-  //   //   //   formData.append('is_hide', JSON.stringify(data.isHidden));
-  //   //   // }
-  //   // }
-  // };
 
   return (
     <FormBuilder
       form={form}
-      onSubmit={(data: ItemFormValues) => formAction(data, form)}
+      onSubmit={handleSubmitForm}
       buttonTitle={initialValue ? 'ویرایش' : 'افزودن'}
       schema={itemFormSchema}
       type={initialValue ? 'edit' : 'add'}>
@@ -298,9 +292,7 @@ function ItemForm({ initialValue, formAction }: ItemFormProps) {
           name='category_id'
           label='دسته بندی'
           placeholder='انتخاب کنید ...'
-          value={
-            initialValue ? initialValue.category_id?.toString() : undefined
-          }
+          defaultValue={initialValue?.category_id?.toString()}
           options={categoryOptions}
         />
         {subcategoryOptions && (
@@ -309,12 +301,17 @@ function ItemForm({ initialValue, formAction }: ItemFormProps) {
             label='زیر دسته'
             name='subcategory_id'
             options={subcategoryOptions}
-            value={initialValue?.subcategory_id?.toString() ?? '0'}
+            defaultValue={initialValue?.subcategory_id?.toString() || '0'}
             customSelectItem={<SelectItem value='0'>بدون زیر دسته</SelectItem>}
           />
         )}
       </FormControllerLayout>
-      <div className='my-12 w-full flex flex-col gap-8'>
+
+      <FormTagsSection form={form} />
+
+      <FormExtraItemsSection form={form} />
+
+      <div className='mb-12 mt-8 w-full flex flex-col gap-8'>
         <FormSwitch
           form={form}
           name='is_available'

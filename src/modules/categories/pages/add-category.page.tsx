@@ -14,8 +14,10 @@ export default function AddCategoryPage() {
     formData.append('branch_id', '0');
     formData.append('image', data.image[0]);
     formData.append('translations', JSON.stringify(data.translations));
-    const res = await createCategory(formData);
-    if (res.status == 201) form.reset();
+    formData.append('subcategories', JSON.stringify(data.subcategories));
+    console.log(data)
+    // const res = await createCategory(formData);
+    // if (res.status == 201) form.reset();
   };
 
   return (

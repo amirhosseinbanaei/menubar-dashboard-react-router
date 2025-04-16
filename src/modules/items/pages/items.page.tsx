@@ -1,5 +1,4 @@
 import { ContentSection } from '@/common/components/content-section';
-import { SortableList } from '@/common/components/stj';
 import { useEffect, useState } from 'react';
 import { Item } from '../interfaces/item.interface';
 import { useItems } from '../hooks/useItems';
@@ -7,44 +6,48 @@ import { useDeleteItem } from '../hooks/useDeleteItem';
 import { Link } from 'react-router';
 import { Button } from '@/common/components/ui/button';
 import { listingOrders } from '@/common/services/listing-orders.service';
-import ItemsCard from '../components/item-cards';
+import {
+  Card,
+  CardDeleteDialog,
+  CardIconButton,
+} from '@/common/components/ui/reusable-card';
+import { DragDrop } from '@/common/components/drag-drop/drag-drop';
+import { useCategories } from '@/modules/categories/hooks/useCategories';
+import FilterCategoryButton from '../components/filter-category-button';
+
 export default function ItemsPage() {
-  const { data: items } = useItems();
-  const { mutateAsync: deleteItem } = useDeleteItem();
-  const [sortableItems, setSortableItems] = useState<Item[]>([]);
+  const { data: categories } = useCategories();
+  const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
+
   const [shouldSort, setShouldSort] = useState<boolean>(false);
-  const [sortEnd, setSortEnd] = useState<boolean>(false);
 
   useEffect(() => {
-    if (items) {
-      const sortItemsByOrder = items.sort(
-        (a: Item, b: Item) => a.order - b.order,
-      );
-      setSortableItems(sortItemsByOrder);
+    if (categories && categories.length > 0 && selectedCategory === null) {
+      setSelectedCategory(categories[0].id);
     }
-  }, [items]);
+  }, [categories, selectedCategory]);
 
-  const onDelete = async (id: number) => {
-    await deleteItem(id);
-  };
+  if (!selectedCategory) return null;
 
-  useEffect(() => {
-    if (sortEnd) {
-      const newSortedData = sortableItems.map((item, index) => {
-        return { id: item.id, order: index + 1 };
-      });
-      listingOrders('items', { orders: newSortedData });
-      setSortEnd(false);
-    }
-  }, [sortableItems, sortEnd]);
-
-  // const onSort = async (sortable: Sortable | null, store: Store) => {
-  //   console.log(sortable);
-  //   console.log(store);
-  // };
   return (
     <>
       <ContentSection title={'محصولات'}>
+        {/* Categories Section */}
+        <div className='w-full flex gap-5 mb-10'>
+          {categories &&
+            categories.map((category, index) => {
+              return (
+                <FilterCategoryButton
+                  key={`category-card:${index}`}
+                  category={category}
+                  isSelected={selectedCategory === category.id}
+                  onClick={() => setSelectedCategory(category.id)}
+                />
+              );
+            })}
+        </div>
+
+        {/* Buttons Section */}
         <span className='mb-6 flex gap-x-5'>
           <Link to={!shouldSort ? '/items/add' : ''}>
             <Button
@@ -69,29 +72,76 @@ export default function ItemsPage() {
           )}
         </span>
 
-        <div className='my-3 h-auto w-full overflow-x-auto rounded-sm bg-transparent shadow-c-xl'>
-          <SortableList
-            name='items-card'
-            items={sortableItems}
-            setItems={setSortableItems}
-            setSortEnd={setSortEnd}
-            className='flex h-auto w-auto flex-shrink-0 flex-col gap-5 bg-transparent md:w-full'
-            renderItem={(item, index) => (
-              <ItemsCard
-                data={item}
-                index={index}
-                shouldSort={shouldSort}
-                editLink={`/items/${item.id}`}
-                dialogConfig={{
-                  title: 'حذف محصول',
-                  description: 'آیا از حذف محصول',
-                }}
-                onDelete={() => onDelete(item.id)}
-              />
-            )}
+        {selectedCategory && (
+          <RenderItems
+            category_id={selectedCategory}
+            shouldSort={shouldSort}
           />
-        </div>
+        )}
       </ContentSection>
     </>
+  );
+}
+
+function RenderItems({
+  category_id,
+  shouldSort,
+}: {
+  category_id: number;
+  shouldSort: boolean;
+}) {
+  const { data: items } = useItems(category_id);
+  const { mutateAsync: deleteItem } = useDeleteItem();
+  const [sortableItems, setSortableItems] = useState<Item[]>([]);
+
+  useEffect(() => {
+    if (items) {
+      const sortItemsByOrder = items.sort(
+        (a: Item, b: Item) => a.order - b.order,
+      );
+      setSortableItems(sortItemsByOrder);
+    }
+  }, [items]);
+
+  const handleSort = (newData: Item[]) => {
+    const newSortedData = newData.map((item, index) => {
+      return { id: item.id, order: index + 1 };
+    });
+    listingOrders('items', { category_id, orders: newSortedData });
+    setSortableItems(newData);
+  };
+  return (
+    <div className='my-3 h-auto w-full overflow-x-auto rounded-sm bg-transparent shadow-c-xl'>
+      <DragDrop
+        items={sortableItems}
+        onChange={(newSortedData) => handleSort(newSortedData)}
+        direction='vertical'
+        renderItem={(item, dragHadnle, _, index) => (
+          <Card
+            index={index + 1}
+            dragHandle={dragHadnle}
+            dragHandleIcon='bars'
+            shouldSort={shouldSort}
+            key={`item-card-${index}`}
+            image={item.image}
+            title={item.translations[0].name}
+            description={item.translations[0].description}
+            descriptionAlign='vertical'
+            actions={
+              <>
+                <Link to={`/items/${item.id}`}>
+                  <CardIconButton icon='Pencil' />
+                </Link>
+                <CardDeleteDialog
+                  title='آیتم'
+                  description='حذف آیتم'
+                  onDelete={async () => await deleteItem(item.id)}
+                />
+              </>
+            }
+          />
+        )}
+      />
+    </div>
   );
 }

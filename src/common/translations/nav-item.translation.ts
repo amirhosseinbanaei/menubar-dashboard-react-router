@@ -5,7 +5,9 @@ const fa = {
   settings: 'تنظیمات',
   customers: 'باشگاه مشتریان',
   about: 'درباره مجموعه',
-  orderedItem: 'سفارش های ثبت شده',
+  orders: 'لیست سفارش ها',
+  tags: 'برچسب ها',
+  extraItems: 'آیتم های اضافی',
   tableReserved: 'میز های رزرو شده',
 };
 

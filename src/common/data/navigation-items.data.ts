@@ -18,14 +18,26 @@ const navigationItems = [
   { id: 3, translation_key: 'items', href: '/items', icons: TagIcon },
   {
     id: 4,
-    translation_key: 'extra-items',
+    translation_key: 'extraItems',
     href: '/extra-items',
     icons: TagIcon,
   },
   {
     id: 5,
+    translation_key: 'tags',
+    href: '/tags',
+    icons: TagIcon,
+  },
+  {
+    id: 6,
     translation_key: 'customers',
     href: '/customers',
+    icons: UserCircleIcon,
+  },
+  {
+    id: 7,
+    translation_key: 'orders',
+    href: '/orders',
     icons: UserCircleIcon,
   },
   // {
@@ -38,6 +50,12 @@ const navigationItems = [
     id: 6,
     translation_key: 'about',
     href: '/about',
+    icons: InformationCircleIcon,
+  },
+  {
+    id: 6,
+    translation_key: 'customization',
+    href: '/customization',
     icons: InformationCircleIcon,
   },
   // {

@@ -16,7 +16,13 @@ import { Toaster } from 'react-hot-toast';
 // import { AuthContextProvider } from './contexts/AuthContext';
 // import { LanguageProvider } from './contexts/LanguageContext';
 
-export const queryClient = new QueryClient();
+export const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 function App() {
   return (

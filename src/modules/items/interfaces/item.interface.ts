@@ -1,4 +1,6 @@
 import { Translation } from "@/common/interfaces/translation.interface";
+import { ExtraItem } from "@/modules/extra-items/interfaces/extra-item.interface";
+import { Tag } from "@/modules/tags/interfaces/tag.interface";
 
 export interface Item {
   id: number;
@@ -11,6 +13,7 @@ export interface Item {
   is_hidden: boolean;
   is_available: boolean;
   translations: Translation[];
-  // tags: TagResponseDto[];
+  tags: Tag[];
+  extra_items: ExtraItem[]
   created_at: Date;
 }

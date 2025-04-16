@@ -1,19 +1,49 @@
 import { ContentSection } from '@/common/components/content-section';
-import { OrdersTable } from '../components/test';
 import { useOrders } from '../hooks/use-orders';
-import { OrderTableColumns } from '../components/table-columns';
+import { orderColumns } from '../components/table-columns';
+import { DataTable } from '@/common/components/data-table';
+import { PaginationProvider } from '@/common/contexts/pagination.context';
+import { useEffect } from 'react';
+import usePagination from '@/common/hooks/usePagination';
+
+function OrdersTable() {
+  const paginationData = usePagination({
+    initialData: {
+      pageIndex: 0,
+      pageSize: 3,
+    },
+    siblingCount: 1
+  });
+
+  const { data, isLoading } = useOrders({
+    page: paginationData.pagination.pageIndex + 1,
+    limit: paginationData.pagination.pageSize,
+  });
+
+  useEffect(() => {
+    if (data?.meta) {
+      paginationData.setTotalCount(data.meta.total);
+    }
+  }, [data]);
+
+  if (!data) return null;
+
+  return (
+    <DataTable
+      data={data.data}
+      isLoading={isLoading}
+      columns={orderColumns}
+      paginationData={paginationData}
+    />
+  );
+}
 
 export default function OrdersPage() {
-  const { data } = useOrders();
-  console.log(data)
   return (
     <ContentSection title='لیست سفارشات'>
-      {data && (
-        <OrdersTable
-          data={data}
-          columns={OrderTableColumns}
-        />
-      )}
+      <PaginationProvider>
+        <OrdersTable />
+      </PaginationProvider>
     </ContentSection>
   );
 }

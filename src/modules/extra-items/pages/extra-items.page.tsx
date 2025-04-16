@@ -1,9 +1,9 @@
 import { Link } from 'react-router';
 import { Button } from '@/common/components/ui/button';
 import { useExtraItems } from '../hooks/useExtraItems';
-import ExtraItemCard from '../components/extra-item-cards';
 import { ContentSection } from '@/common/components/content-section';
 import { useDeleteExtraItem } from '../hooks/useDeleteExtraItem';
+import { Card, CardIconButton } from '@/common/components/ui/reusable-card';
 
 export default function ExtraItemsPage() {
   const { data: extraItems, isLoading } = useExtraItems();
@@ -19,14 +19,38 @@ export default function ExtraItemsPage() {
             <Button variant={'primary'}>افزودن آیتم اضافی</Button>
           </Link>
 
-          <div className='my-8 h-auto w-full overflow-x-auto rounded-sm bg-transparent  grid grid-cols-1 lg:grid-cols-2 gap-5'>
+          <div className='my-8 h-auto w-full overflow-x-auto rounded-sm bg-transparent shadow-c-xl  grid grid-cols-1 lg:grid-cols-2 gap-5'>
             {extraItems.map((extraItem, index) => {
               return (
-                <ExtraItemCard
+                <Card
                   key={`extra-item-card-${index}`}
-                  data={extraItem}
-                  editLink={`/extra-items/${extraItem.id}`}
-                  onDelete={() => deleteExtraItem(extraItem.id)}
+                  image={extraItem.image}
+                  title={extraItem.translations[0].name}
+                  description={
+                    <p className='text-text-light'>
+                      قیمت :{' '}
+                      {Intl.NumberFormat('fa-IR', {
+                        useGrouping: true,
+                        minimumFractionDigits: 0,
+                        maximumFractionDigits: 2,
+                      }).format(extraItem.price)}{' '}
+                      تومان
+                    </p>
+                  }
+                  descriptionAlign='vertical'
+                  actions={
+                    <>
+                      <Link to={`/extra-items/${extraItem.id}`}>
+                        <CardIconButton icon='Pencil' />
+                      </Link>
+                      <CardIconButton
+                        icon='Trash'
+                        onClick={async () =>
+                          await deleteExtraItem(extraItem.id)
+                        }
+                      />
+                    </>
+                  }
                 />
               );
             })}
