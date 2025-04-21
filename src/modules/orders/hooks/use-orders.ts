@@ -3,10 +3,14 @@ import { getOrders } from '../services/order.service';
 import { Order } from '../interface/order.interface';
 import { PaginationMeta } from '@/common/interfaces/pagination.interface';
 
-export function useOrders({ page, limit }: Partial<PaginationMeta>) {
+export function useOrders({
+  page,
+  limit,
+  search,
+}: Partial<PaginationMeta> & { search?: string }) {
   const { data, isLoading, isError, isFetching } = useQuery({
-    queryKey: ['orders', page, limit],
-    queryFn: async () => await getOrders(limit, page),
+    queryKey: ['orders', page, limit, search],
+    queryFn: async () => await getOrders(limit, page, search),
   });
 
   return {

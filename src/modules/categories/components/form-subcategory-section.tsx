@@ -1,5 +1,5 @@
 import { Card, CardIconButton } from '@/common/components/ui';
-import { AddSubcategoryDialog } from './subcategory-dialog';
+import { SubcategoryDialog } from './subcategory-dialog';
 import { SubcategoryFormValues } from './subcategory-form';
 import { UseFormReturn, useWatch } from 'react-hook-form';
 import { CategoryFormValues } from './category-form';
@@ -102,7 +102,7 @@ export function FormSubcategorySection({
       }>
       <span className='flex items-center'>
         <h1 className='px-3 text-text-light'>زیر دسته‌ها</h1>
-        <AddSubcategoryDialog
+        <SubcategoryDialog
           trigger={
             <CardIconButton
               icon='Plus'
@@ -111,9 +111,11 @@ export function FormSubcategorySection({
               className='rounded-xs'
             />
           }
-          onAdd={(_, form) => {
-            addSubcategory(form);
+          title='افزودن زیر دسته'
+          dialogAction={(subCategoryForm) => {
+            addSubcategory(subCategoryForm);
           }}
+          dialogActionType='add-in-form'
         />
       </span>
       <DragDrop

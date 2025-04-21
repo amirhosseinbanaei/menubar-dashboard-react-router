@@ -15,9 +15,8 @@ export default function AddCategoryPage() {
     formData.append('image', data.image[0]);
     formData.append('translations', JSON.stringify(data.translations));
     formData.append('subcategories', JSON.stringify(data.subcategories));
-    console.log(data)
-    // const res = await createCategory(formData);
-    // if (res.status == 201) form.reset();
+    const res = await createCategory(formData);
+    if (res.status == 201) form.reset();
   };
 
   return (

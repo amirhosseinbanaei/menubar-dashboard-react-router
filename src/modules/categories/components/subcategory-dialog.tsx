@@ -8,21 +8,23 @@ import {
   DialogTrigger,
 } from '@/common/components/ui/dialog';
 import SubcategoryForm, { SubcategoryFormValues } from './subcategory-form';
+import { ReactNode } from 'react';
 import { Button } from '@/common/components/ui/button';
-import React, { ReactNode } from 'react';
-import { Subcategory } from '../interfaces/subcategory.interface';
-import { UseFormReturn } from 'react-hook-form';
+import { useFormContext, UseFormReturn } from 'react-hook-form';
+import { AddToFormButton } from '@/common/components/form-buttons';
 
 interface SubcategoryDialogProps {
   trigger: ReactNode;
   title: string;
-  children: ReactNode;
+  dialogAction: (subCategoryForm: UseFormReturn<SubcategoryFormValues>) => void;
+  dialogActionType: 'add' | 'edit' | 'add-in-form';
 }
 
-function SubcategoryDialog({
+export function SubcategoryDialog({
   trigger,
-  children,
   title,
+  dialogAction,
+  dialogActionType,
 }: SubcategoryDialogProps) {
   return (
     <Dialog>
@@ -33,85 +35,136 @@ function SubcategoryDialog({
           <DialogTitle>{title}</DialogTitle>
         </DialogHeader>
 
-        {children}
+        <SubcategoryForm>
+          <DialogFooter>
+            <SubcategoryDialogButtons
+              dialogAction={dialogAction}
+              dialogActionType={dialogActionType}
+            />
+          </DialogFooter>
+        </SubcategoryForm>
       </DialogContent>
     </Dialog>
   );
 }
 
-interface AddSubcategoryDialogProps {
-  trigger: ReactNode;
-  onAdd: (
-    data: SubcategoryFormValues,
-    form: UseFormReturn<SubcategoryFormValues>,
-  ) => void;
-  addButtonProps?: React.ComponentProps<'button'>;
-}
-
-function AddSubcategoryDialog({
-  onAdd,
-  trigger,
-  addButtonProps,
-}: AddSubcategoryDialogProps) {
+function SubcategoryDialogButtons({
+  dialogAction,
+  dialogActionType,
+}: {
+  dialogAction: (subCategoryForm: UseFormReturn<SubcategoryFormValues>) => void;
+  dialogActionType: 'add' | 'edit' | 'add-in-form';
+}) {
+  const subCategoryForm = useFormContext<SubcategoryFormValues>();
   return (
-    <SubcategoryDialog
-      title='افزودن زیر دسته'
-      trigger={trigger}>
-      <SubcategoryForm onSubmit={onAdd}>
-        <DialogFooter>
-          <DialogClose
-            asChild
-            className='w-1/2'>
-            <Button variant='secondary'>انصراف</Button>
-          </DialogClose>
-          <Button
-            // type='submit'
-            type='button'
-            variant='primary'
-            className='w-1/2'
-            {...addButtonProps}>
-            افزودن
-          </Button>
-        </DialogFooter>
-      </SubcategoryForm>
-    </SubcategoryDialog>
+    <>
+      <DialogClose
+        asChild
+        className='w-1/2'>
+        <Button variant='secondary'>انصراف</Button>
+      </DialogClose>
+      <AddToFormButton
+        type={'button'}
+        form={subCategoryForm}
+        className='w-1/2'
+        buttonAction={() => dialogAction(subCategoryForm)}
+      />
+    </>
   );
 }
 
-interface EditSubcategoryDialogProps {
-  trigger: ReactNode;
-  initialValue: Subcategory;
-  onEdit: () => void;
-}
+// interface SubcategoryDialogProps {
+//   trigger: ReactNode;
+//   title: string;
+//   children: ReactNode;
+// }
 
-function EditSubcategoryDialog({
-  trigger,
-  initialValue,
-  onEdit,
-}: EditSubcategoryDialogProps) {
-  return (
-    <SubcategoryDialog
-      title='ویرایش زیر دسته'
-      trigger={trigger}>
-      <SubcategoryForm
-        initialValue={initialValue}
-        onSubmit={onEdit}>
-        <DialogFooter>
-          <DialogClose
-            asChild
-            className='w-1/2'>
-            <Button variant='secondary'>انصراف</Button>
-          </DialogClose>
-          <Button
-            type='submit'
-            variant='primary'
-            className='w-1/2'>
-            ویرایش
-          </Button>
-        </DialogFooter>
-      </SubcategoryForm>
-    </SubcategoryDialog>
-  );
-}
+// function SubcategoryDialog({
+//   trigger,
+//   children,
+//   title,
+// }: SubcategoryDialogProps) {
+//   return (
+//     <Dialog>
+//       <DialogTrigger>{trigger}</DialogTrigger>
 
-export { SubcategoryDialog, AddSubcategoryDialog, EditSubcategoryDialog };
+//       <DialogContent>
+//         <DialogHeader>
+//           <DialogTitle>{title}</DialogTitle>
+//         </DialogHeader>
+
+//         {children}
+//       </DialogContent>
+//     </Dialog>
+//   );
+// }
+
+// interface AddSubcategoryDialogProps {
+//   trigger: ReactNode;
+//   dialogAddButton: ReactNode;
+// }
+
+// function AddSubcategoryDialog({
+//   trigger,
+//   dialogAddButton,
+// }: AddSubcategoryDialogProps) {
+//   return (
+//     <SubcategoryDialog
+//       title='افزودن زیر دسته'
+//       trigger={trigger}>
+//       <SubcategoryForm>
+//         <DialogFooter>
+//           {/* <DialogClose
+//             asChild
+//             className='w-1/2'>
+//             <Button variant='secondary'>انصراف</Button>
+//           </DialogClose> */}
+//           {/* {dialogAddButton} */}
+//           <SubcategoryDialogButtons />
+//           {/* <Button
+//             // type='submit'
+//             type='button'
+//             variant='primary'
+//             className='w-1/2'
+//             {...addButtonProps}>
+//             افزودن
+//           </Button> */}
+//         </DialogFooter>
+//       </SubcategoryForm>
+//     </SubcategoryDialog>
+//   );
+// }
+
+// interface EditSubcategoryDialogProps {
+//   trigger: ReactNode;
+//   initialValue: Subcategory;
+// }
+
+// function EditSubcategoryDialog({
+//   trigger,
+//   initialValue,
+// }: EditSubcategoryDialogProps) {
+//   return (
+//     <SubcategoryDialog
+//       title='ویرایش زیر دسته'
+//       trigger={trigger}>
+//       <SubcategoryForm initialValue={initialValue}>
+//         <DialogFooter>
+//           <DialogClose
+//             asChild
+//             className='w-1/2'>
+//             <Button variant='secondary'>انصراف</Button>
+//           </DialogClose>
+//           {/* <Button
+//             type='submit'
+//             variant='primary'
+//             className='w-1/2'>
+//             ویرایش
+//           </Button> */}
+//         </DialogFooter>
+//       </SubcategoryForm>
+//     </SubcategoryDialog>
+//   );
+// }
+
+// export { SubcategoryDialog, AddSubcategoryDialog, EditSubcategoryDialog };

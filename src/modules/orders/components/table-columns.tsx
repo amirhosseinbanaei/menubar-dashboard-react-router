@@ -81,6 +81,14 @@ export const orderColumns: ColumnDef<Order, OrderValue>[] = [
     },
   },
   {
+    accessorKey: 'table_number',
+    header: 'شماره میز',
+    cell: ({ row }) => {
+      const tableNumber = row.getValue('table_number') as number;
+      return tableNumber || '-';
+    },
+  },
+  {
     accessorKey: 'discount_amount',
     header: 'تخفیف',
     cell: ({ row }) => {
@@ -97,12 +105,11 @@ export const orderColumns: ColumnDef<Order, OrderValue>[] = [
     },
   },
   {
-    accessorKey: 'created_at',
+    accessorKey: 'date',
     header: 'تاریخ',
     cell: ({ row }) => {
-      const date = new Date(row.getValue('created_at'));
+      const date = new Date(row.original.created_at);
       const dateStr = new Intl.DateTimeFormat('fa-IR', {
-        // year: 'numeric',
         month: 'long',
         day: 'numeric',
       }).format(date);
@@ -110,10 +117,10 @@ export const orderColumns: ColumnDef<Order, OrderValue>[] = [
     },
   },
   {
-    accessorKey: 'created_at',
+    accessorKey: 'time',
     header: 'ساعت',
     cell: ({ row }) => {
-      const date = new Date(row.getValue('created_at'));
+      const date = new Date(row.original.created_at);
       const time = Intl.DateTimeFormat('fa-IR', {
         hour: '2-digit',
         minute: '2-digit',

@@ -1,6 +1,6 @@
 // subcategory-form.tsx
 import { ReactNode, useEffect, useState } from 'react';
-import { Form, useForm, UseFormReturn } from 'react-hook-form';
+import { FormProvider, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useLanguages } from '@/modules/languages/hooks/useLanguages';
 import { TranslationTabs } from '@/common/components/translation-tabs';
@@ -8,22 +8,22 @@ import { useTranslation } from 'react-i18next';
 import { Subcategory } from '../interfaces/subcategory.interface';
 import { SubcategoryFormValues } from '../interfaces/subcategory-form-value.interface';
 import { subcategoryFormSchema } from '../schemas/subcategory-form.schema';
-import { FormBuilder } from '@/common/components/form-builder';
+
 
 export type { SubcategoryFormValues };
 
 interface SubcategoryFormProps {
   children?: ReactNode;
   initialValue?: Subcategory;
-  onSubmit: (
-    data: SubcategoryFormValues,
-    form: UseFormReturn<SubcategoryFormValues>,
-  ) => void;
+  // onSubmit: (
+  //   data: SubcategoryFormValues,
+  //   form: UseFormReturn<SubcategoryFormValues>,
+  // ) => void;
 }
 
 function SubcategoryForm({
   initialValue,
-  onSubmit,
+  // onSubmit,
   children,
 }: SubcategoryFormProps) {
   const { t } = useTranslation();
@@ -56,52 +56,59 @@ function SubcategoryForm({
   if (!languages?.length) return null;
 
   return (
-    <FormBuilder
-      form={form}
-      onSubmit={(data, form) => onSubmit(data, form)}
-      type={initialValue ? 'edit' : 'add'}
-      schema={subcategoryFormSchema}
-      buttonTitle='افزودن'>
-      <div className='mt-3 mb-8'>
-        <TranslationTabs
-          t={t}
-          form={form}
-          languages={languages}
-          translationsPath='translations'
-          selectedLanguageIndex={selectedLanguageIndex}
-          setSelectedLanguageIndex={setSelectedLanguageIndex}
-          fields={[
-            {
-              name: 'name',
-              label: 'نام زیر دسته',
-              placeholder: 'نام به {lang}',
-            },
-          ]}
-        />
-      </div>
-    </FormBuilder>
-    // <Form {...form}>
-    //   <form onSubmit={form.handleSubmit((data) => onSubmit(data, form))}>
-    // <div className='mt-3 mb-8'>
-    //   <TranslationTabs
-    //     t={t}
-    //     form={form}
-    //     languages={languages}
-    //     translationsPath='translations'
-    //     selectedLanguageIndex={selectedLanguageIndex}
-    //     setSelectedLanguageIndex={setSelectedLanguageIndex}
-    //     fields={[
-    //       {
-    //         name: 'name',
-    //         label: 'نام زیر دسته',
-    //         placeholder: 'نام به {lang}',
-    //       },
-    //     ]}
-    //   />
-    // </div>
-    //     {children}
-    //   </form>
-    // </Form>
+    // <FormBuilder
+    //   form={form}
+    //   onSubmit={(data, form) => onSubmit(data, form)}
+    //   type={initialValue ? 'edit' : 'add'}
+    //   schema={subcategoryFormSchema}
+    //   buttonTitle='افزودن'>
+    //   <div className='mt-3 mb-8'>
+    //     <TranslationTabs
+    //       t={t}
+    //       form={form}
+    //       languages={languages}
+    //       translationsPath='translations'
+    //       selectedLanguageIndex={selectedLanguageIndex}
+    //       setSelectedLanguageIndex={setSelectedLanguageIndex}
+    //       fields={[
+    //         {
+    //           name: 'name',
+    //           label: 'نام زیر دسته',
+    //           placeholder: 'نام به {lang}',
+    //         },
+    //       ]}
+    //     />
+    //   </div>
+    // </FormBuilder>
+    <FormProvider {...form}>
+      <form>
+        <div className='mt-3 mb-8'>
+          <TranslationTabs
+            t={t}
+            form={form}
+            languages={languages}
+            translationsPath='translations'
+            selectedLanguageIndex={selectedLanguageIndex}
+            setSelectedLanguageIndex={setSelectedLanguageIndex}
+            fields={[
+              {
+                name: 'name',
+                label: 'نام زیر دسته',
+                placeholder: 'نام به {lang}',
+              },
+            ]}
+          />
+        </div>
+        {/* <FormFooter>
+          <AddToFormButton
+            form={form}
+            buttonAction={(e) => onSubmit(e)}
+          />
+          {children}
+        </FormFooter> */}
+        {children}
+      </form>
+    </FormProvider>
   );
 }
 

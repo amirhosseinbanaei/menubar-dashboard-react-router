@@ -183,6 +183,7 @@ export function CardDragHandleButton({
           variant={'outline-icon'}
           size={'icon'}
           {...dragHandle}
+          type='button'
           className='sort-handle hover:bg-transparent'>
           <Bars2Icon className='h-5 w-5' />
         </Button>
@@ -191,6 +192,7 @@ export function CardDragHandleButton({
           variant={'default'}
           size={'icon'}
           {...dragHandle}
+          type='button'
           className='flex items-center hover:bg-transparent'>
           <ArrowsPointingOutIcon className='h-5 w-5' />
         </Button>

@@ -15,6 +15,7 @@ import { Translation } from '@/modules/languages/interfaces/translation.interfac
 import { SubcategoryDialog } from '../components/subcategory-dialog';
 import { Card, CardDeleteDialog } from '@/common/components/ui';
 import { DragDrop } from '@/common/components/drag-drop/drag-drop';
+import { useCreateSubcategory } from '../hooks/useCreateSubcategory';
 
 export default function EditCategoryPage() {
   const pathname = useLocation().pathname;
@@ -72,6 +73,9 @@ function SubcategorySection({ category }: { category: Category }) {
   const { mutateAsync: deleteSubcategory } = useDeleteSubcategory({
     categoryId: category.id,
   });
+  const { mutateAsync: createSubcategory } = useCreateSubcategory({
+    categoryId: category.id,
+  });
   const [sortableItems, setSortableItems] = useState<Subcategory[]>([]);
 
   useEffect(() => {
@@ -97,7 +101,17 @@ function SubcategorySection({ category }: { category: Category }) {
   return (
     <ContentSection title={'زیر دسته ها'}>
       <SubcategoryDialog
-        type='add'
+        dialogActionType='add'
+        title='افزودن زیر دسته'
+        dialogAction={async (form) => {
+          const newSubcategory = form.getValues();
+          const res = await createSubcategory({
+            restaurant_id: 1,
+            category_id: category.id,
+            translations: newSubcategory.translations,
+          });
+          if (res.status === 201) form.reset();
+        }}
         trigger={<Button variant={'primary'}>افزودن زیر دسته</Button>}
       />
 
@@ -124,7 +138,6 @@ function SubcategorySection({ category }: { category: Category }) {
           />
         )}
       />
-      
     </ContentSection>
   );
 }

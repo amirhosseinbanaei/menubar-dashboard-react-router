@@ -11,7 +11,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, Search } from 'lucide-react';
 
 import { Button } from '@/common/components/ui';
 import {
@@ -44,12 +44,16 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '@/common/components/ui/pagination';
+import { DatePickerDemo } from './ui/date-picker';
+import { JalaliDatePicker } from './calendar/custom-date-picker';
 
 interface DataTableProps<TData, TValue> {
   data: TData[];
   columns: ColumnDef<TData, TValue>[];
   isLoading?: boolean;
   paginationData: ReturnPagination;
+  onSearch: (e: React.BaseSyntheticEvent) => void;
+  searchValue?: string;
 }
 
 export function DataTable<TData, TValue>({
@@ -57,6 +61,8 @@ export function DataTable<TData, TValue>({
   columns,
   paginationData,
   isLoading,
+  onSearch,
+  searchValue,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -93,25 +99,40 @@ export function DataTable<TData, TValue>({
 
   return (
     <div className='w-full'>
-      <div className='flex items-center '>
+      <div className='flex items-center gap-4 mb-6'>
         <DataTableFilter table={table} />
-        <Input
-          placeholder='جستجو...'
-          value={(table.getColumn('id')?.getFilterValue() as string) ?? ''}
-          onChange={(event) =>
-            table.getColumn('id')?.setFilterValue(event.target.value)
-          }
-          className='max-w-sm'
+        <DropdownMenu dir='rtl'>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant='outline'
+              className='flex justify-center h-12 px-3 py-2 items-center gap-2'>
+              تاریخ <ChevronDown />
+            </Button>
+          </DropdownMenuTrigger>
+
+          <DropdownMenuContent
+            className='p-3 space-y-1'
+            align='start'>
+            <JalaliDatePicker />
+          </DropdownMenuContent>
+        </DropdownMenu>
+        <DataTableInput
+          value={searchValue ?? ''}
+          onChange={(e) => onSearch(e)}
         />
       </div>
-      <div className='rounded-md'>
+      <div className='border border-gray-200 rounded-md'>
         <Table>
-          <TableHeader>
+          <TableHeader className='bg-gray-50/50'>
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
+              <TableRow
+                key={headerGroup.id}
+                className='border-b border-gray-200'>
                 {headerGroup.headers.map((header) => {
                   return (
-                    <TableHead key={header.id}>
+                    <TableHead
+                      key={header.id}
+                      className='font-medium text-gray-700 py-3'>
                       {header.isPlaceholder
                         ? null
                         : flexRender(
@@ -129,19 +150,22 @@ export function DataTable<TData, TValue>({
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
-                  className='h-24 text-center'>
+                  className='h-24 text-center text-gray-500'>
                   در حال بارگذاری...
                 </TableCell>
               </TableRow>
             ) : table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
+              table.getRowModel().rows.map((row, index) => (
                 <TableRow
                   key={row.id}
+                  className={`border-b border-gray-100 hover:bg-gray-50/70 transition-colors ${
+                    index % 2 === 0 ? 'bg-white' : 'bg-gray-50/30'
+                  }`}
                   data-state={row.getIsSelected() && 'selected'}>
                   {row.getVisibleCells().map((cell) => (
                     <TableCell
                       key={cell.id}
-                      className='py-3'>
+                      className='py-3 text-gray-800'>
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext(),
@@ -154,7 +178,7 @@ export function DataTable<TData, TValue>({
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
-                  className='h-24 text-center'>
+                  className='h-24 text-center text-gray-500'>
                   نتیجه‌ای یافت نشد.
                 </TableCell>
               </TableRow>
@@ -162,12 +186,36 @@ export function DataTable<TData, TValue>({
           </TableBody>
         </Table>
       </div>
-      <div className='pt-8 py-4'>
+      <div className='mt-5 py-2 border-t border-gray-100'>
         <DataTablePagination
           table={table}
           paginationData={paginationData}
         />
       </div>
+    </div>
+  );
+}
+
+interface DataTableInputProps {
+  value: string;
+  onChange: (event: React.BaseSyntheticEvent) => void;
+  placeholder?: string;
+}
+
+export function DataTableInput({
+  value,
+  onChange,
+  placeholder = 'جستجو ...',
+}: DataTableInputProps) {
+  return (
+    <div className='relative h-16 w-10/12'>
+      <Search className='absolute left-3 top-[49%] -translate-y-1/2 h-4 w-4 text-muted-foreground' />
+      <Input
+        placeholder={placeholder}
+        value={value}
+        onChange={(e) => onChange(e)}
+        className='pl-9 w-full'
+      />
     </div>
   );
 }
@@ -194,7 +242,6 @@ export function DataTablePagination<TData>({
           />
         </PaginationItem>
         {range?.map((pageNumber) => {
-          console.log(pageNumber);
           if (typeof pageNumber !== 'number') {
             return (
               <PaginationItem key={'DOTS'}>
@@ -232,61 +279,59 @@ interface DataTableFilterProps<TData> {
 
 export function DataTableFilter<TData>({ table }: DataTableFilterProps<TData>) {
   return (
-    <div className='flex items-center justify-between'>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            variant='outline'
-            className='flex justify-center items-center gap-2'>
-            Filter <ChevronDown />
-          </Button>
-        </DropdownMenuTrigger>
+    <DropdownMenu dir='rtl'>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant='outline'
+          className='flex justify-center h-12 px-3 py-2 items-center gap-2'>
+          فیلتر جدول <ChevronDown />
+        </Button>
+      </DropdownMenuTrigger>
 
-        <DropdownMenuContent
-          className='p-3 space-y-1'
-          align='end'>
-          <DropdownMenuSub>
-            <DropdownMenuSubTrigger>تعداد ردیف ها</DropdownMenuSubTrigger>
-            <DropdownMenuPortal>
-              <DropdownMenuSubContent className='mx-5'>
-                {[1, 2, 3, 10, 20, 30, 40, 50].map((pageSize) => (
-                  <DropdownMenuCheckboxItem
-                    key={pageSize}
-                    className='capitalize'
-                    checked={table.getState().pagination.pageSize === pageSize}
-                    onCheckedChange={() => table.setPageSize(pageSize)}>
-                    {pageSize}
-                  </DropdownMenuCheckboxItem>
-                ))}
-              </DropdownMenuSubContent>
-            </DropdownMenuPortal>
-          </DropdownMenuSub>
+      <DropdownMenuContent
+        className='p-3 space-y-1'
+        align='start'>
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger>تعداد ردیف ها</DropdownMenuSubTrigger>
+          <DropdownMenuPortal>
+            <DropdownMenuSubContent className='mx-5'>
+              {[1, 2, 3, 10, 20, 30, 40, 50].map((pageSize) => (
+                <DropdownMenuCheckboxItem
+                  key={pageSize}
+                  className='capitalize'
+                  checked={table.getState().pagination.pageSize === pageSize}
+                  onCheckedChange={() => table.setPageSize(pageSize)}>
+                  {pageSize}
+                </DropdownMenuCheckboxItem>
+              ))}
+            </DropdownMenuSubContent>
+          </DropdownMenuPortal>
+        </DropdownMenuSub>
 
-          <DropdownMenuSub>
-            <DropdownMenuSubTrigger>فیلتر ستون ها</DropdownMenuSubTrigger>
-            <DropdownMenuPortal>
-              <DropdownMenuSubContent>
-                {table
-                  .getAllColumns()
-                  .filter((column) => column.getCanHide())
-                  .map((column) => {
-                    return (
-                      <DropdownMenuCheckboxItem
-                        key={column.id}
-                        className='capitalize'
-                        checked={column.getIsVisible()}
-                        onCheckedChange={(value) =>
-                          column.toggleVisibility(!!value)
-                        }>
-                        {column.id}
-                      </DropdownMenuCheckboxItem>
-                    );
-                  })}
-              </DropdownMenuSubContent>
-            </DropdownMenuPortal>
-          </DropdownMenuSub>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    </div>
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger>فیلتر ستون ها</DropdownMenuSubTrigger>
+          <DropdownMenuPortal>
+            <DropdownMenuSubContent>
+              {table
+                .getAllColumns()
+                .filter((column) => column.getCanHide())
+                .map((column) => {
+                  return (
+                    <DropdownMenuCheckboxItem
+                      key={column.id}
+                      className='capitalize'
+                      checked={column.getIsVisible()}
+                      onCheckedChange={(value) =>
+                        column.toggleVisibility(!!value)
+                      }>
+                      {column.id}
+                    </DropdownMenuCheckboxItem>
+                  );
+                })}
+            </DropdownMenuSubContent>
+          </DropdownMenuPortal>
+        </DropdownMenuSub>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
