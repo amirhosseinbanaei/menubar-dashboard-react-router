@@ -24,6 +24,7 @@ interface TranslationTabsProps<TFormSchema extends z.ZodType> {
   t: TFunction;
   selectedLanguageIndex: number;
   setSelectedLanguageIndex: (index: number) => void;
+  className?: string;
 }
 
 export function TranslationTabs<TFormSchema extends z.ZodType>({
@@ -34,6 +35,7 @@ export function TranslationTabs<TFormSchema extends z.ZodType>({
   t,
   selectedLanguageIndex,
   setSelectedLanguageIndex,
+  className,
 }: TranslationTabsProps<TFormSchema>) {
   if (!languages?.length) return null;
   const defaultLanguage = languages[0].language_code;
@@ -98,6 +100,7 @@ export function TranslationTabs<TFormSchema extends z.ZodType>({
                 return (
                   <FormTextarea<TFormSchema>
                     key={`${lang.language_code}-${field.name}`}
+                    className={className}
                     form={form}
                     name={
                       `${translationsPath}.${langIndex}.${field.name}` as Path<
@@ -131,7 +134,7 @@ export function TranslationTabs<TFormSchema extends z.ZodType>({
               //         '{lang}',
               //         lang.language_name,
               //       )}
-                  
+
               //     />
               //     // <div className='w-full flex gap-5 items-end'>
               //     //   <div className='w-full'>

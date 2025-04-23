@@ -1,301 +1,94 @@
 import { ContentSection } from '@/common/components/content-section';
-import { Path, useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { useToast } from '@/common/hooks/use-toast';
-import { useMutation } from '@tanstack/react-query';
-import { updateMenuColors } from '../services/customization.service';
-import { FormBuilder } from '@/common/components/form-builder';
-import { FormInput } from '@/common/components/form-fields';
-import FormControllerLayout from '@/common/components/layouts/form-controller.layout';
-import { memo } from 'react';
-interface ColorPaletteProps {
-  title: string;
-  colors: {
-    background: string;
-    foreground: string;
-    primary: string;
-    primaryForeground: string;
-  };
-  onSelect: (colors: {
-    background: string;
-    foreground: string;
-    primary: string;
-    primaryForeground: string;
-  }) => void;
-}
-
-const ColorPalette = memo(({ title, colors, onSelect }: ColorPaletteProps) => {
-  return (
-    <div className='border rounded-lg p-4'>
-      <h3 className='font-medium text-sm mb-2'>{title}</h3>
-      <div className='flex justify-center gap-2 mb-3'>
-        <div
-          className='w-6 h-6 rounded-md border'
-          style={{ backgroundColor: colors.background }}
-          title='پس‌زمینه'
-        />
-        <div
-          className='w-6 h-6 rounded-md border'
-          style={{ backgroundColor: colors.foreground }}
-          title='پیش‌زمینه'
-        />
-        <div
-          className='w-6 h-6 rounded-md border'
-          style={{ backgroundColor: colors.primary }}
-          title='اصلی'
-        />
-        <div
-          className='w-6 h-6 rounded-md border'
-          style={{ backgroundColor: colors.primaryForeground }}
-          title='پیش‌زمینه اصلی'
-        />
-      </div>
-      <button
-        onClick={() => onSelect(colors)}
-        className='w-full py-2 px-4 bg-gray-100 hover:bg-gray-200 rounded-md text-xs font-medium transition-all'>
-        انتخاب این پالت
-      </button>
-    </div>
-  );
-});
-
-const ColorPalettes = memo(
-  ({ onSelect }: { onSelect: (colors: ColorFormValues) => void }) => {
-    const predefinedPalettes = [
-      {
-        title: 'کلاسیک',
-        colors: {
-          background: '#ffffff',
-          foreground: '#000000',
-          primary: '#000000',
-          primaryForeground: '#ffffff',
-        },
-      },
-      {
-        title: 'مدرن',
-        colors: {
-          background: '#f8f9fa',
-          foreground: '#212529',
-          primary: '#0d6efd',
-          primaryForeground: '#ffffff',
-        },
-      },
-      {
-        title: 'تیره',
-        colors: {
-          background: '#212529',
-          foreground: '#f8f9fa',
-          primary: '#0dcaf0',
-          primaryForeground: '#000000',
-        },
-      },
-      {
-        title: 'گرم',
-        colors: {
-          background: '#fff8f0',
-          foreground: '#4a3f35',
-          primary: '#ff7700',
-          primaryForeground: '#ffffff',
-        },
-      },
-    ];
-
-    return (
-      <div className='mb-8'>
-        <h2 className='text-lg font-medium mb-4'>پالت‌های آماده</h2>
-        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4'>
-          {predefinedPalettes.map((palette, index) => (
-            <ColorPalette
-              key={index}
-              title={palette.title}
-              colors={palette.colors}
-              onSelect={onSelect}
-            />
-          ))}
-        </div>
-      </div>
-    );
-  },
-);
-
-const colorSchema = z.object({
-  background: z.string().min(1, 'رنگ پس‌زمینه الزامی است'),
-  foreground: z.string().min(1, 'رنگ پیش‌زمینه الزامی است'),
-  primary: z.string().min(1, 'رنگ اصلی الزامی است'),
-  primaryForeground: z.string().min(1, 'رنگ پیش‌زمینه اصلی الزامی است'),
-});
-
-type ColorFormValues = z.infer<typeof colorSchema>;
+import { ColorDialog, ColorFormValues, ColorPalettes } from '../components';
+import { useColorPalettes } from '../hooks/use-color-palettes';
+import { useCallback, useState } from 'react';
+import { Button } from '@/common/components/ui';
+import { PlusIcon } from 'lucide-react';
 
 export default function CustomizationPage() {
-  const { toast } = useToast();
-  const form = useForm<ColorFormValues>({
-    resolver: zodResolver(colorSchema),
-    defaultValues: {
-      background: '#ffffff',
-      foreground: '#000000',
-      primary: '#000000',
-      primaryForeground: '#ffffff',
-    },
-  });
-
-  const { mutate: updateColors } = useMutation({
-    mutationFn: updateMenuColors,
-    onSuccess: () => {
-      toast({
-        title: 'موفقیت',
-        description: 'رنگ‌های منو با موفقیت به‌روزرسانی شدند',
-      });
-    },
-    onError: () => {
-      toast({
-        title: 'خطا',
-        description: 'خطایی در به‌روزرسانی رنگ‌ها رخ داد',
-        variant: 'destructive',
-      });
-    },
-  });
-
-  const onSubmit = (data: ColorFormValues) => {
-    updateColors(data);
-  };
-
-  const background = form.watch('background');
-  const foreground = form.watch('foreground');
-  const primary = form.watch('primary');
-  const primaryForeground = form.watch('primaryForeground');
+  const { data, isLoading } = useColorPalettes();
+  const [activeTab, setActiveTab] = useState<'default' | 'custom'>('default');
+  
+  const handlePaletteSelect = useCallback((colors: ColorFormValues) => {
+    console.log(colors);
+  }, []);
 
   return (
     <ContentSection title='شخصی سازی منو'>
-      <ColorPalettes />
-      <ColorPreview
-        background={background}
-        foreground={foreground}
-        primary={primary}
-        primaryForeground={primaryForeground}
-      />
-
-      <FormBuilder
-        type='edit'
-        buttonTitle='ذخیره تغییرات'
-        schema={colorSchema}
-        form={form}
-        onSubmit={onSubmit}>
-        <FormControllerLayout>
-          <ColorField
-            form={form}
-            name='background'
-            label='رنگ پس‌زمینه'
-            placeholder='#ffffff'
-            color={background}
-          />
-          <ColorField
-            form={form}
-            name='foreground'
-            label='رنگ پیش‌زمینه'
-            placeholder='#000000'
-            color={foreground}
-          />
-        </FormControllerLayout>
-
-        <FormControllerLayout>
-          <ColorField
-            form={form}
-            name='primary'
-            label='رنگ اصلی'
-            placeholder='#000000'
-            color={primary}
-          />
-          <ColorField
-            form={form}
-            name='primaryForeground'
-            label='رنگ پیش‌زمینه اصلی'
-            placeholder='#ffffff'
-            color={primaryForeground}
-          />
-        </FormControllerLayout>
-      </FormBuilder>
+      <div className="flex items-center mb-8">
+        <ColorDialog
+          trigger={
+            <Button variant={'primary'} className="flex items-center gap-2 justify-center">
+              <PlusIcon size={16} />
+              <span>پالت جدید</span>
+            </Button>
+          }
+          title='اضافه کردن پالت جدید'
+          description='پالت جدید خود را از طریق فرم زیر اضافه کنید.'
+        />
+      </div>
+      
+      <div className="mb-6">
+        <div className="flex space-x-1 space-x-reverse border-b">
+          <button
+            onClick={() => setActiveTab('default')}
+            className={`px-4 py-2 text-sm font-medium transition-colors relative ${
+              activeTab === 'default' 
+                ? 'text-primary' 
+                : 'text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            پالت‌های آماده
+            {activeTab === 'default' && (
+              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
+            )}
+          </button>
+          <button
+            onClick={() => setActiveTab('custom')}
+            className={`px-4 py-2 text-sm font-medium transition-colors relative ${
+              activeTab === 'custom' 
+                ? 'text-primary' 
+                : 'text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            پالت‌های من
+            {activeTab === 'custom' && (
+              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
+            )}
+          </button>
+        </div>
+      </div>
+      
+      {isLoading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[1, 2, 3, 4].map(i => (
+            <div key={i} className="h-32 bg-gray-100 rounded animate-pulse" />
+          ))}
+        </div>
+      ) : (
+        <div className="transition-all">
+          {activeTab === 'default' && data?.default_palettes && (
+            <ColorPalettes
+              onSelect={handlePaletteSelect}
+              colors={data.default_palettes}
+            />
+          )}
+          
+          {activeTab === 'custom' && data?.custom_palettes && (
+            data.custom_palettes.length > 0 ? (
+              <ColorPalettes
+                onSelect={handlePaletteSelect}
+                colors={data.custom_palettes}
+              />
+            ) : (
+              <div className="flex flex-col items-center justify-center py-12 text-center">
+                <p className="text-gray-500 mb-2">هنوز پالت شخصی ندارید</p>
+                <p className="text-sm text-gray-400">برای ایجاد پالت جدید از دکمه "پالت جدید" استفاده کنید</p>
+              </div>
+            )
+          )}
+        </div>
+      )}
     </ContentSection>
-  );
-}
-
-interface ColorPreviewProps {
-  background: string;
-  foreground: string;
-  primary: string;
-  primaryForeground: string;
-}
-
-const ColorPreview = memo(function ColorPreview({
-  background,
-  foreground,
-  primary,
-  primaryForeground,
-}: ColorPreviewProps) {
-  return (
-    <div className='mb-6 p-5 bg-white rounded-lg'>
-      <h3 className='text-base font-medium mb-3'>پیش‌نمایش رنگ‌ها</h3>
-      <div className='flex flex-wrap gap-3'>
-        <div
-          className='p-3 rounded-md flex items-center justify-center w-28 h-12 text-xs font-medium transition-all'
-          style={{
-            backgroundColor: primary,
-            color: primaryForeground,
-          }}>
-          دکمه اصلی
-        </div>
-
-        <div
-          className='p-3 rounded-md flex items-center justify-center w-28 h-12 text-xs font-medium transition-all'
-          style={{
-            backgroundColor: background,
-            color: foreground,
-          }}>
-          پس‌زمینه منو
-        </div>
-      </div>
-    </div>
-  );
-});
-
-interface ColorFieldProps<TFormSchema extends z.ZodType> {
-  form: ReturnType<typeof useForm<z.infer<TFormSchema>>>;
-  name: string;
-  label: string;
-  placeholder: string;
-  color: string;
-}
-
-function ColorField<TFormSchema extends z.ZodType>({
-  form,
-  name,
-  label,
-  placeholder,
-  color,
-}: ColorFieldProps<TFormSchema>) {
-  return (
-    <div className='bg-white rounded-lg p-4'>
-      <div className='flex items-center gap-2 mb-3'>
-        <div
-          className='w-6 h-6 rounded-full border'
-          style={{ backgroundColor: color }}
-        />
-        <h3 className='font-medium text-sm'>{label}</h3>
-      </div>
-      <div className='flex gap-2'>
-        <FormInput
-          form={form}
-          name={name as Path<z.infer<TFormSchema>>}
-          type='color'
-        />
-        <FormInput
-          form={form}
-          name={name as Path<z.infer<TFormSchema>>}
-          type='text'
-          placeholder={placeholder}
-        />
-      </div>
-    </div>
   );
 }

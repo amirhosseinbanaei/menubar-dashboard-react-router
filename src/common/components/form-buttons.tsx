@@ -43,7 +43,7 @@ export function AddToFormButton<TFormSchema extends z.ZodType>({
   buttonAction,
   type = 'submit',
   ...props
-}: React.ComponentProps<'button'> & 
+}: React.ComponentProps<'button'> &
    Pick<FormButtonProps<TFormSchema>, 'form' | 'buttonAction' | 'type'>) {
   return (
     <FormButton
@@ -78,3 +78,90 @@ export function EditFormButton<TFormSchema extends z.ZodType>({
     />
   );
 }
+
+// import React, { BaseSyntheticEvent } from 'react';
+// import { UseFormReturn } from 'react-hook-form';
+// import { z, ZodType, ZodTypeDef } from 'zod';
+// import { Button } from './ui';
+
+// type ActionType = 'add' | 'edit';
+
+// interface FormButtonProps<
+//   TSchema extends ZodType<unknown, ZodTypeDef, unknown>,
+// > {
+//   title: string;
+//   form: UseFormReturn<z.infer<TSchema>>;
+//   buttonAction: (e: BaseSyntheticEvent) => void;
+//   actionType: ActionType;
+//   type?: 'button' | 'submit' | 'reset';
+// }
+
+// export function FormButton<
+//   TSchema extends ZodType<unknown, ZodTypeDef, unknown>,
+// >({
+//   form,
+//   title,
+//   type = 'submit',
+//   buttonAction,
+//   actionType,
+//   ...rest
+// }: React.ComponentProps<'button'> & FormButtonProps<TSchema>) {
+//   const { isValid, isSubmitting, isDirty } = form.formState;
+
+//   const isDisabled =
+//     !isValid || isSubmitting || (actionType === 'edit' && !isDirty);
+
+//   return (
+//     <Button
+//       type={type}
+//       variant='primary'
+//       onClick={buttonAction}
+//       disabled={isDisabled}
+//       className={isDisabled ? 'opacity-75' : ''}
+//       {...rest}>
+//       {title}
+//     </Button>
+//   );
+// }
+
+// export function AddToFormButton<
+//   TSchema extends ZodType<unknown, ZodTypeDef, unknown>,
+// >({
+//   form,
+//   buttonAction,
+//   type = 'submit',
+//   ...rest
+// }: Omit<FormButtonProps<TSchema>, 'title' | 'actionType'> &
+//   React.ComponentProps<'button'>) {
+//   return (
+//     <FormButton
+//       form={form}
+//       buttonAction={buttonAction}
+//       title='افزودن'
+//       actionType='add'
+//       type={type}
+//       {...rest}
+//     />
+//   );
+// }
+
+// export function EditFormButton<
+//   TSchema extends ZodType<unknown, ZodTypeDef, unknown>,
+// >({
+//   form,
+//   buttonAction,
+//   type = 'submit',
+//   ...rest
+// }: Omit<FormButtonProps<TSchema>, 'title' | 'actionType'> &
+//   React.ComponentProps<'button'>) {
+//   return (
+//     <FormButton
+//       form={form}
+//       buttonAction={buttonAction}
+//       title='ویرایش'
+//       actionType='edit'
+//       type={type}
+//       {...rest}
+//     />
+//   );
+// }
