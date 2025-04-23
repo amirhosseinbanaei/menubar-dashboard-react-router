@@ -29,6 +29,7 @@ import { z } from 'zod';
 import { FormBuilder } from '@/common/components/form-builder';
 import { FormInput } from '@/common/components/form-fields';
 import { useLanguageStore } from '@/common/stores/language.store';
+import { AdminLogin } from '../services/auth.service';
 
 // import { loginAdmin } from '../services/Axios/Requests/Admin';
 export default function Login() {
@@ -95,13 +96,14 @@ function LoginForm() {
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginFormSchema),
     defaultValues: {
-      email: '',
-      password: '',
+      email: 'john.doe@example.com',
+      password: 'Password1@',
     },
+    mode: 'onChange',
   });
 
-  const onSubmit = (data: LoginFormValues) => {
-    console.log(data);
+  const onSubmit = async (data: LoginFormValues) => {
+    await AdminLogin(data.email, data.password);
   };
 
   return (
@@ -110,16 +112,18 @@ function LoginForm() {
         form={form}
         onSubmit={onSubmit}
         buttonTitle='وارد شوید'
+        type='add'
         schema={loginFormSchema}>
-        <FormInput
-          form={form}
-          name='email'
-          label='ایمیل'
-          placeholder='email..'
-          type='email'
-        />
+        <div className='flex flex-col gap-5'>
+          <FormInput
+            form={form}
+            name='email'
+            label='ایمیل'
+            placeholder='email..'
+            type='email'
+          />
 
-        {/* <FormSelect
+          {/* <FormSelect
           form={form}
           name='userType'
           label='نوع کاربر'
@@ -130,12 +134,13 @@ function LoginForm() {
           ]}
         /> */}
 
-        <FormInput
-          form={form}
-          name='password'
-          label='رمز عبور'
-          type='password'
-        />
+          <FormInput
+            form={form}
+            name='password'
+            label='رمز عبور'
+            type='password'
+          />
+        </div>
       </FormBuilder>
     </>
   );
