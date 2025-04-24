@@ -1,25 +1,19 @@
-import { ReactNode, useEffect } from 'react';
+import { ReactNode } from 'react';
 import { useAuthStore } from '../store/auth.store';
-// import { Navigate } from 'react-router';
+import { Navigate } from 'react-router';
 
 export function AuthGuard({ element }: { element: ReactNode }) {
-  const { checkAuth, isAuthenticated } = useAuthStore();
+  const { isLoading, admin } = useAuthStore();
 
-  useEffect(() => {
-    checkAuth();
-  }, []);
-
-  if (isAuthenticated === null) {
+  if (isLoading === true && admin === null) {
     return <div>Loading...</div>;
-  } else if (isAuthenticated === false) {
-    // return (
-    //   <Navigate
-    //     to='/login'
-    //     replace
-    //   />
-    // );
-    return element;
+  } else if (isLoading === false && admin === null) {
+    return (
+      <Navigate
+        to='/login'
+        replace
+      />
+    );
   }
-
   return element;
 }

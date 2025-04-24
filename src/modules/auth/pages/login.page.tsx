@@ -29,7 +29,7 @@ import { z } from 'zod';
 import { FormBuilder } from '@/common/components/form-builder';
 import { FormInput } from '@/common/components/form-fields';
 import { useLanguageStore } from '@/common/stores/language.store';
-import { AdminLogin } from '../services/auth.service';
+import { useAuthStore } from '../store/auth.store';
 
 // import { loginAdmin } from '../services/Axios/Requests/Admin';
 export default function Login() {
@@ -80,6 +80,7 @@ export default function Login() {
 }
 
 function LoginForm() {
+  const { login } = useAuthStore.getState();
   const loginFormSchema = z.object({
     email: z.string().min(1, 'Email is required').email('Invalid email format'),
     // userType: z.string().min(1, 'User type is required'),
@@ -96,14 +97,14 @@ function LoginForm() {
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginFormSchema),
     defaultValues: {
-      email: 'john.doe@example.com',
-      password: 'Password1@',
+      email: '',
+      password: '',
     },
     mode: 'onChange',
   });
 
-  const onSubmit = async (data: LoginFormValues) => {
-    await AdminLogin(data.email, data.password);
+  const onSubmit = (data: LoginFormValues) => {
+    login(data.email, data.password);
   };
 
   return (

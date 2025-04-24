@@ -1,61 +1,72 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import Cookies from 'js-cookie';
 import { toast } from 'react-hot-toast';
-
-interface User {
-  accessToken: string;
-  [key: string]: any; // for other user data
-}
+import { Admin } from '../interface/admin.interface';
+import { AdminLogin, AdminLogOut } from '../services/auth.service';
+import { queryClient } from '@/App';
+import { getRestaurant } from '@/modules/restaurant/services/restaurant.service';
 
 interface AuthState {
-  currentUser: User | false;
-  isAuthenticated: boolean | null;
-  login: (userData: User) => void;
+  admin: Admin | null;
+  isLoading: boolean;
+  login: (email: string, password: string) => void;
   logout: () => void;
-  checkAuth: () => void;
 }
 
 export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
-      currentUser: false,
-      isAuthenticated: null,
+      admin: null,
+      isLoading: false,
 
-      login: (userData) => {
-        set({
-          currentUser: userData,
-          isAuthenticated: true,
-        });
-      },
-
-      logout: () => {
-        set({
-          currentUser: false,
-          isAuthenticated: false,
-        });
-        Cookies.remove('accessToken');
-        toast.success('از حساب کاربری خود خارج شدید .');
-      },
-
-      checkAuth: () => {
-        const accessToken = Cookies.get('accessToken');
-        set((state) => {
-          if (
-            accessToken &&
-            state.currentUser &&
-            accessToken === state.currentUser.accessToken
-          ) {
-            return { isAuthenticated: true };
+      login: async (email: string, password: string) => {
+        set({ isLoading: true });
+        try {
+          const res = await AdminLogin(email, password);
+          if (res?.status === 200) {
+            const admin = res.data.data as Admin;
+            if (admin) {
+              queryClient.fetchQuery({
+                queryKey: ['restaurant'],
+                queryFn: async () => {
+                  await getRestaurant(admin.restaurant_id);
+                },
+              });
+            }
+            set({
+              admin,
+            });
+            toast.success('با موفقیت به حساب کاربری خود وارد شدید .');
+            window.location.href = '/';
           }
-          return { isAuthenticated: false };
-        });
+        } catch {
+          toast.error('خطا در ورود');
+          set({ admin: null });
+        } finally {
+          set({ isLoading: false });
+        }
+      },
+
+      logout: async () => {
+        set({ isLoading: true });
+        try {
+          const res = await AdminLogOut();
+          if (res?.status === 200) {
+            set({ admin: null });
+            toast.success('از حساب کاربری خود خارج شدید .');
+            window.location.href = '/login';
+          }
+        } catch {
+          toast.error('خطا در خروج');
+        } finally {
+          set({ isLoading: false });
+        }
       },
     }),
     {
       name: 'auth-storage', // unique name for localStorage
       storage: createJSONStorage(() => localStorage),
-      partialize: (state) => ({ currentUser: state.currentUser }), // only persist currentUser
+      partialize: (state) => ({ admin: state.admin }), // only persist admin
     },
   ),
 );

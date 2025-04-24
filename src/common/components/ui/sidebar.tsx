@@ -12,10 +12,13 @@ import { useThemeStore } from '@/common/stores/theme.store';
 import { navigationItems } from '@/common/data/navigation-items.data';
 import { Button } from './button';
 import { ReactNode } from 'react';
+import { LogOutIcon } from 'lucide-react';
+import { useAuthStore } from '@/modules/auth/store/auth.store';
 
 function Sidebar() {
   const dir = useLanguageStore((state) => state.direction);
   const isShow = useThemeStore((state) => state.showSidebar);
+  const { logout } = useAuthStore();
   return (
     <>
       <div
@@ -44,6 +47,13 @@ function Sidebar() {
         {/* Buttons Container Layer */}
         <div className='flex h-[calc(100%-72px)] w-full flex-col gap-2'>
           <SidebarItems />
+          {/* Logout Button */}
+          <SidebarButton
+            title='خروج از حساب کاربری'
+            icon={<LogOutIcon className='mb-1 h-5 w-5 text-inherit' />}
+            className='text-destructive hover:bg-destructive/5 hover:text-destructive'
+            onClick={() => logout()}
+          />
         </div>
       </div>
     </>
@@ -131,18 +141,40 @@ function SidebarItems() {
           <Link
             key={`sidebar-item-${index}`}
             to={navItem.href}>
-            <Button
-              className={cn(
-                'flex h-14 w-full items-center justify-start gap-x-2 rounded-sm px-5 text-sm font-medium text-text hover:bg-primary/10 hover:text-primary',
-                { 'bg-primary/10 text-primary': isItemActive === true },
-              )}>
-              <navItem.icons className='mb-1 h-5 w-5 text-inherit' />
-              {t(`nav_items.${navItem.translation_key}`)}
-            </Button>
+            <SidebarButton
+              title={t(`nav_items.${navItem.translation_key}`)}
+              icon={<navItem.icons className='mb-1 h-5 w-5 text-inherit' />}
+              isItemActive={isItemActive}
+            />
           </Link>
         );
       })}
     </>
+  );
+}
+
+function SidebarButton({
+  title,
+  icon,
+  isItemActive = false,
+  className,
+  ...props
+}: {
+  title: string;
+  icon: ReactNode;
+  isItemActive?: boolean;
+} & React.ComponentProps<'button'>) {
+  return (
+    <Button
+      className={cn(
+        'flex h-14 w-full items-center justify-start gap-x-2 rounded-sm px-5 text-sm font-medium text-text hover:bg-primary/10 hover:text-primary',
+        className,
+        { 'bg-primary/10 text-primary': isItemActive === true },
+      )}
+      {...props}>
+      {icon}
+      {title}
+    </Button>
   );
 }
 
